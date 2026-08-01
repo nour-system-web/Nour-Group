@@ -79,7 +79,6 @@
 
     <main class="flex-1 flex flex-col overflow-y-auto bg-[#f8fafc] dark:bg-gray-900 transition-colors duration-200">
         
-        <!-- شريط علوي لإضافة زر الوضع الداكن/الفاتح -->
         <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-3 flex justify-between items-center transition-colors duration-200">
             <div class="text-sm font-bold text-gray-700 dark:text-gray-200">مرحباً بك، أستاذ نور</div>
             <button onclick="toggleDarkMode()" class="p-2 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-yellow-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition flex items-center gap-2 text-xs font-bold shadow-sm">
@@ -360,7 +359,6 @@
             </div>
         </section>
 
-        <!-- قسم الطلبات الجديد -->
         <section id="tab-orders" class="hidden p-6 space-y-6">
             <div class="flex justify-between items-center">
                 <div>
@@ -508,6 +506,25 @@
     </div>
 
     <script>
+        // دالة مساعدة لتحديد شعار الشركة أو الصنف تلقائياً بناءً على اسم المنتج
+        function getProductLogo(productName) {
+            const name = productName.toLowerCase();
+            if (name.includes('شيبسي')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Chipsy_logo.svg/120px-Chipsy_logo.svg.png';
+            if (name.includes('تايجر')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Tiger_Chips_logo.svg/120px-Tiger_Chips_logo.svg.png';
+            if (name.includes('لايز') || name.includes('lays')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Lay%27s_logo.svg/120px-Lay%27s_logo.svg.png';
+            if (name.includes('دوريتوس')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Doritos_logo_%282013%29.svg/120px-Doritos_logo_%282013%29.svg.png';
+            if (name.includes('شيتوس')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Cheetos_logo.svg/120px-Cheetos_logo.svg.png';
+            if (name.includes('أريال')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Ariel_logo_%282020%29.svg/120px-Ariel_logo_%282020%29.svg.png';
+            if (name.includes('تايد')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Tide_logo.svg/120px-Tide_logo.svg.png';
+            if (name.includes('برسيل')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Persil_logo.svg/120px-Persil_logo.svg.png';
+            if (name.includes('ليبتون')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Lipton_Logo.svg/120px-Lipton_Logo.svg.png';
+            if (name.includes('فيري') || name.includes('fairy')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Fairy_logo.svg/120px-Fairy_logo.svg.png';
+            if (name.includes('بريل')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Logo_placeholder_gray.svg/120px-Logo_placeholder_gray.svg.png';
+            if (name.includes('كلوركس')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Clorox_logo.svg/120px-Clorox_logo.svg.png';
+            // شعار افتراضي لوجوهات عامة أو غير مخصصة
+            return 'logo.png';
+        }
+
         // Default Products Data Imported directly from spreadsheet CSV
         const defaultProducts = [
             { id: 1001, code: "1001", barcode: "6222002300016", name: "شاي العروسة ناعم - 40 جم", category: "شاي ناعم", price: 12, cost: 9.6, stock: 2 },
@@ -570,7 +587,6 @@
             { id: 1065, code: "1065", barcode: "6222005050033", name: "هاربيك منظف ومطهر التواليت - 700 مل", category: "مذيب دهون", price: 60, cost: 48, stock: 699 }
         ];
 
-        // System State Variables
         let products = [];
         let cart = [];
         let invoices = [];
@@ -579,7 +595,6 @@
         let selectedInvoiceToDelete = null;
         let categoryChartInstance = null;
 
-        // On Page Initialization
         window.addEventListener('DOMContentLoaded', () => {
             initTheme();
             initStorage();
@@ -592,7 +607,6 @@
             renderOrdersList();
         });
 
-        // Dark/Light Mode Logic
         function initTheme() {
             const savedTheme = localStorage.getItem('nour_erp_theme') || 'light';
             if (savedTheme === 'dark') {
@@ -624,7 +638,6 @@
             }
         }
 
-        // Initialize Local Storage
         function initStorage() {
             const savedProducts = localStorage.getItem('nour_erp_products');
             if (savedProducts) {
@@ -695,7 +708,6 @@
             document.getElementById('current-date').innerText = today;
         }
 
-        // Tab Navigation
         function switchTab(tabId) {
             ['dashboard', 'pos', 'inventory', 'products', 'invoices', 'orders'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.add('hidden');
@@ -713,7 +725,6 @@
             if (tabId === 'orders') renderOrdersList();
         }
 
-        // Toast Notification System
         function showToast(msg, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -732,7 +743,6 @@
             }, 3000);
         }
 
-        // Render Dashboard Stats & Charts
         function renderDashboard() {
             const totalSales = invoices.reduce((sum, i) => sum + (i.finalTotal || 0), 0);
             const totalProfit = invoices.reduce((sum, i) => sum + (i.profit || 0), 0);
@@ -796,7 +806,7 @@
             }
         }
 
-        // POS Search & Render
+        // POS Search & Render (تم إضافة عرض لوجو الشركة لكل صنف بجوار اسمه)
         function renderPosSearchResults() {
             const query = document.getElementById('pos-search').value.trim().toLowerCase();
             const container = document.getElementById('pos-search-results');
@@ -813,27 +823,34 @@
                 return;
             }
 
-            container.innerHTML = filtered.map(prod => `
-                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between hover:border-blue-300 transition">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-xs bg-gray-100 dark:bg-gray-700 font-bold px-2 py-0.5 rounded text-gray-600 dark:text-gray-300">كود: ${prod.code}</span>
-                            <span class="text-xs ${prod.stock <= 10 ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-700'} font-bold px-2 py-0.5 rounded">مخزون: ${prod.stock}</span>
+            container.innerHTML = filtered.map(prod => {
+                const logoUrl = getProductLogo(prod.name);
+                return `
+                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between hover:border-blue-300 transition">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-xs bg-gray-100 dark:bg-gray-700 font-bold px-2 py-0.5 rounded text-gray-600 dark:text-gray-300">كود: ${prod.code}</span>
+                                <span class="text-xs ${prod.stock <= 10 ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-700'} font-bold px-2 py-0.5 rounded">مخزون: ${prod.stock}</span>
+                            </div>
+                            <div class="flex items-center gap-2.5 mb-2">
+                                <div class="w-8 h-8 bg-gray-50 dark:bg-gray-700 p-1 rounded-lg border border-gray-100 dark:border-gray-600 flex items-center justify-center shrink-0">
+                                    <img src="${logoUrl}" alt="Logo" class="max-h-full max-w-full object-contain">
+                                </div>
+                                <h4 class="font-bold text-gray-800 dark:text-white text-sm line-clamp-1">${prod.name}</h4>
+                            </div>
+                            <p class="text-xs text-gray-400 mb-3">${prod.category}</p>
                         </div>
-                        <h4 class="font-bold text-gray-800 dark:text-white text-sm mb-1">${prod.name}</h4>
-                        <p class="text-xs text-gray-400 mb-3">${prod.category}</p>
+                        <div class="flex justify-between items-center pt-2 border-t dark:border-gray-700">
+                            <span class="text-lg font-black text-blue-600 dark:text-blue-400">${prod.price.toFixed(2)} ج.م</span>
+                            <button onclick="addToCart(${prod.id})" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1">
+                                <i class="fa-solid fa-plus"></i> إضافة
+                            </button>
+                        </div>
                     </div>
-                    <div class="flex justify-between items-center pt-2 border-t dark:border-gray-700">
-                        <span class="text-lg font-black text-blue-600 dark:text-blue-400">${prod.price.toFixed(2)} ج.م</span>
-                        <button onclick="addToCart(${prod.id})" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1">
-                            <i class="fa-solid fa-plus"></i> إضافة
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
-        // Cart Logic
         function addToCart(prodId) {
             const prod = products.find(p => p.id === prodId);
             if (!prod) return;
@@ -882,6 +899,7 @@
             renderCart();
         }
 
+        // Render Cart (مع إظهار اللوجو بجوار المنتج داخل السلة أيضاً)
         function renderCart() {
             const container = document.getElementById('cart-items-container');
 
@@ -891,22 +909,30 @@
                 return;
             }
 
-            container.innerHTML = cart.map(item => `
-                <div class="py-2.5 flex justify-between items-center text-xs">
-                    <div class="flex-1 pr-1">
-                        <p class="font-bold text-gray-800 dark:text-white line-clamp-1">${item.name}</p>
-                        <p class="text-gray-400">${item.price.toFixed(2)} ج.م / قطعة</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="flex items-center border dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 overflow-hidden">
-                            <button onclick="updateCartQty(${item.id}, ${item.quantity - 1})" class="px-2 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">-</button>
-                            <span class="px-2 font-bold dark:text-white">${item.quantity}</span>
-                            <button onclick="updateCartQty(${item.id}, ${item.quantity + 1})" class="px-2 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">+</button>
+            container.innerHTML = cart.map(item => {
+                const logoUrl = getProductLogo(item.name);
+                return `
+                    <div class="py-2.5 flex justify-between items-center text-xs">
+                        <div class="flex items-center gap-2 flex-1 pr-1">
+                            <div class="w-6 h-6 bg-white dark:bg-gray-800 p-0.5 rounded border border-gray-200 dark:border-gray-700 flex items-center justify-center shrink-0">
+                                <img src="${logoUrl}" alt="Logo" class="max-h-full max-w-full object-contain">
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-800 dark:text-white line-clamp-1">${item.name}</p>
+                                <p class="text-gray-400">${item.price.toFixed(2)} ج.م</p>
+                            </div>
                         </div>
-                        <span class="font-bold text-blue-600 dark:text-blue-400 w-16 text-left">${(item.price * item.quantity).toFixed(2)}</span>
+                        <div class="flex items-center gap-2">
+                            <div class="flex items-center border dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 overflow-hidden">
+                                <button onclick="updateCartQty(${item.id}, ${item.quantity - 1})" class="px-2 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">-</button>
+                                <span class="px-2 font-bold dark:text-white">${item.quantity}</span>
+                                <button onclick="updateCartQty(${item.id}, ${item.quantity + 1})" class="px-2 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">+</button>
+                            </div>
+                            <span class="font-bold text-blue-600 dark:text-blue-400 w-14 text-left">${(item.price * item.quantity).toFixed(2)}</span>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
 
             calculateCartTotals();
         }
@@ -935,7 +961,6 @@
             document.getElementById('cart-expected-profit').innerText = expectedProfit.toFixed(2) + ' ج.م';
         }
 
-        // Checkout & Export Invoice
         function checkout() {
             if (cart.length === 0) {
                 showToast('السلة فارغة، يرجى إضافة أصناف أولاً', 'error');
@@ -996,7 +1021,7 @@
             showToast(`تم استخراج وإصدار الفاتورة رقم #${newInvoice.id} بنجاح!`, 'success');
         }
 
-        // Inventory Render
+        // Inventory Render (مع إظهار اللوجو بجوار الصنف في جدول المخزون)
         function renderInventoryTable() {
             const query = document.getElementById('inv-search').value.trim().toLowerCase();
             const filter = document.getElementById('inv-filter').value;
@@ -1015,23 +1040,31 @@
             document.getElementById('inv-total-quantity').innerText = products.reduce((sum, p) => sum + p.stock, 0);
             document.getElementById('inv-low-items').innerText = products.filter(p => p.stock <= 10).length;
 
-            tbody.innerHTML = filtered.map(p => `
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b dark:border-gray-700">
-                    <td class="p-3.5 font-bold text-gray-700 dark:text-gray-300">${p.code}</td>
-                    <td class="p-3.5 font-bold text-gray-800 dark:text-white">${p.name}</td>
-                    <td class="p-3.5 text-gray-500">${p.category}</td>
-                    <td class="p-3.5 font-bold ${p.stock <= 10 ? 'text-rose-600' : 'text-emerald-600'}">${p.stock} قطعة</td>
-                    <td class="p-3.5 font-semibold text-gray-800 dark:text-gray-200">${p.price.toFixed(2)} ج.م</td>
-                    <td class="p-3.5">
-                        <span class="px-2.5 py-1 rounded-full text-xs font-bold ${p.stock <= 10 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">
-                            ${p.stock <= 10 ? 'مخزون منخفض' : 'متوفر بالمخزن'}
-                        </span>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = filtered.map(p => {
+                const logoUrl = getProductLogo(p.name);
+                return `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b dark:border-gray-700">
+                        <td class="p-3.5 font-bold text-gray-700 dark:text-gray-300">${p.code}</td>
+                        <td class="p-3.5 font-bold text-gray-800 dark:text-white flex items-center gap-2.5">
+                            <div class="w-7 h-7 bg-white dark:bg-gray-800 p-0.5 rounded border border-gray-200 dark:border-gray-700 flex items-center justify-center shrink-0">
+                                <img src="${logoUrl}" alt="Logo" class="max-h-full max-w-full object-contain">
+                            </div>
+                            <span>${p.name}</span>
+                        </td>
+                        <td class="p-3.5 text-gray-500">${p.category}</td>
+                        <td class="p-3.5 font-bold ${p.stock <= 10 ? 'text-rose-600' : 'text-emerald-600'}">${p.stock} قطعة</td>
+                        <td class="p-3.5 font-semibold text-gray-800 dark:text-gray-200">${p.price.toFixed(2)} ج.م</td>
+                        <td class="p-3.5">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-bold ${p.stock <= 10 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">
+                                ${p.stock <= 10 ? 'مخزون منخفض' : 'متوفر بالمخزن'}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
-        // Products Tab Render & Modals
+        // Products Tab Render & Modals (مع إظهار اللوجو بجوار الصنف في دليل الأصناف)
         function renderProductsTable() {
             const query = document.getElementById('prod-search').value.trim().toLowerCase();
             const tbody = document.getElementById('products-table-body');
@@ -1043,23 +1076,31 @@
                 p.category.toLowerCase().includes(query)
             );
 
-            tbody.innerHTML = filtered.map(p => `
-                <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b dark:border-gray-700">
-                    <td class="p-3.5 font-bold text-gray-700 dark:text-gray-300">${p.code}</td>
-                    <td class="p-3.5 font-mono text-xs text-gray-500">${p.barcode || '-'}</td>
-                    <td class="p-3.5 font-bold text-gray-800 dark:text-white">${p.name}</td>
-                    <td class="p-3.5 text-gray-500">${p.category}</td>
-                    <td class="p-3.5 font-bold text-blue-600 dark:text-blue-400">${p.price.toFixed(2)} ج.م</td>
-                    <td class="p-3.5 font-semibold text-gray-600 dark:text-gray-400">${p.cost.toFixed(2)} ج.م</td>
-                    <td class="p-3.5 font-bold ${p.stock <= 10 ? 'text-rose-600' : 'text-gray-800 dark:text-white'}">${p.stock}</td>
-                    <td class="p-3.5 text-center">
-                        <div class="flex justify-center gap-2">
-                            <button onclick="openProductModal(${p.id})" class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button onclick="openDeleteProductModal(${p.id})" class="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-gray-700 rounded-lg"><i class="fa-solid fa-trash-can"></i></button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = filtered.map(p => {
+                const logoUrl = getProductLogo(p.name);
+                return `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b dark:border-gray-700">
+                        <td class="p-3.5 font-bold text-gray-700 dark:text-gray-300">${p.code}</td>
+                        <td class="p-3.5 font-mono text-xs text-gray-500">${p.barcode || '-'}</td>
+                        <td class="p-3.5 font-bold text-gray-800 dark:text-white flex items-center gap-2.5">
+                            <div class="w-7 h-7 bg-white dark:bg-gray-800 p-0.5 rounded border border-gray-200 dark:border-gray-700 flex items-center justify-center shrink-0">
+                                <img src="${logoUrl}" alt="Logo" class="max-h-full max-w-full object-contain">
+                            </div>
+                            <span>${p.name}</span>
+                        </td>
+                        <td class="p-3.5 text-gray-500">${p.category}</td>
+                        <td class="p-3.5 font-bold text-blue-600 dark:text-blue-400">${p.price.toFixed(2)} ج.م</td>
+                        <td class="p-3.5 font-semibold text-gray-600 dark:text-gray-400">${p.cost.toFixed(2)} ج.م</td>
+                        <td class="p-3.5 font-bold ${p.stock <= 10 ? 'text-rose-600' : 'text-gray-800 dark:text-white'}">${p.stock}</td>
+                        <td class="p-3.5 text-center">
+                            <div class="flex justify-center gap-2">
+                                <button onclick="openProductModal(${p.id})" class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button onclick="openDeleteProductModal(${p.id})" class="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-gray-700 rounded-lg"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function openProductModal(prodId = null) {
@@ -1148,7 +1189,6 @@
             selectedProductToDelete = null;
         }
 
-        // Invoices Tab Logic
         function renderInvoicesList() {
             const query = document.getElementById('invoices-search').value.trim().toLowerCase();
             const container = document.getElementById('invoices-list-container');
@@ -1342,9 +1382,6 @@
             document.getElementById('print-modal').classList.add('hidden');
         }
 
-        // ==========================================
-        // وظائف تبويب "الطلبات" المضافة حديثاً
-        // ==========================================
         function renderOrdersList() {
             const container = document.getElementById('orders-list-container');
             document.getElementById('orders-count-label').innerText = orders.length + ' طلبات';
@@ -1388,7 +1425,6 @@
             }).join('');
         }
 
-        // زر محاكاة لاستقبال طلب من برنامج الموقع الخارجي للتجربة الفورية
         function simulateIncomingOrder() {
             const randomId = Date.now().toString().slice(-5);
             const sampleOrder = {
@@ -1412,14 +1448,12 @@
             showToast(`تم استلام طلب جديد برقم #${randomId} من الموقع الإلكتروني!`, 'info');
         }
 
-        // الموافقة على الطلب وتحويله لفاتورة مبيعات وخصمه من المخزون
         function approveOrder(orderId) {
             const index = orders.findIndex(o => o.id === orderId);
             if (index === -1) return;
 
             const order = orders[index];
 
-            // التحقق من توافر المخزون قبل الموافقة
             for (let item of order.items) {
                 const prod = products.find(p => p.id === item.id);
                 if (!prod || prod.stock < item.quantity) {
@@ -1428,14 +1462,12 @@
                 }
             }
 
-            // خصم الكميات من المخزون
             order.items.forEach(item => {
                 const prod = products.find(p => p.id === item.id);
                 if (prod) prod.stock -= item.quantity;
             });
             saveProductsToStorage();
 
-            // تحويل الطلب إلى فاتورة مبيعات معتمدة
             const newInvoice = {
                 id: order.id,
                 date: order.date,
@@ -1452,11 +1484,9 @@
             invoices.push(newInvoice);
             saveInvoicesToStorage();
 
-            // إزالة الطلب من قائمة الطلبات المعلقة
             orders.splice(index, 1);
             saveOrdersToStorage();
 
-            // تحديث الواجهات
             renderOrdersList();
             renderInvoicesList();
             renderDashboard();
@@ -1466,7 +1496,6 @@
             showToast(`تمت الموافقة على الطلب #${orderId} وتحويله إلى فاتورة بيع وخصمه من المخزون بنجاح!`, 'success');
         }
 
-        // رفض الطلب وحذفه من الطلبات المعلقة
         function rejectOrder(orderId) {
             orders = orders.filter(o => o.id !== orderId);
             saveOrdersToStorage();
