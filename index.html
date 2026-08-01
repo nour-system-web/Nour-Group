@@ -3,364 +3,1476 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nour Group ERP - نظام إدارة المبيعات والمخزون</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Nour Group ERP - نظام إدارة المبيعات والمخزون</title> 
+    <link rel="icon" type="image/png" href="logo.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
         }
     </script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Html5-Qrcode Library CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
         body { font-family: 'Cairo', sans-serif; }
+        .sidebar-item.active { background-color: #1e293b; border-right: 4px solid #3b82f6; color: #fff; }
+        .sidebar-item { color: #94a3b8; transition: all 0.2s ease; }
+        .sidebar-item:hover { background-color: #0f172a; color: #f8fafc; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-slate-950 text-gray-800 dark:text-gray-100 transition-colors duration-200">
+<body class="flex h-screen overflow-hidden text-gray-800 dark:text-gray-100 bg-[#f4f6f9] dark:bg-gray-900 transition-colors duration-200">
 
-    <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar -->
-        <aside class="w-64 bg-slate-900 text-white flex flex-col justify-between hidden md:flex">
-            <div>
-                <div class="p-5 text-xl font-bold border-b border-slate-800 flex items-center gap-2">
-                    <span class="bg-blue-600 p-2 rounded text-white font-black">N</span>
+    <div id="toast-container" class="fixed top-5 left-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <aside class="w-64 bg-[#0b1329] dark:bg-gray-950 flex flex-col justify-between shrink-0 shadow-xl z-20 transition-colors duration-200">
+        <div>
+            <div class="p-5 border-b border-gray-800 text-center flex flex-col items-center">
+                <div class="w-20 h-20 bg-white rounded-2xl p-2 shadow-lg mb-3 flex items-center justify-center border border-gray-700">
+                    <img src="logo.png" alt="Nour Group Logo" class="max-h-full max-w-full object-contain">
+                </div>
+                <h1 class="text-xl font-bold text-white tracking-wide">Nour Group ERP</h1>
+                <p class="text-xs text-blue-400 font-medium mt-1">نور جروب — نظام المبيعات والمخزون</p>
+            </div>
+
+            <nav class="mt-4 space-y-1">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="sidebar-item active w-full flex items-center px-6 py-3.5 text-sm font-semibold">
+                    <i class="fa-solid fa-chart-pie w-6 text-lg"></i>
+                    <span>لوحة التحكم</span>
+                </button>
+                <button onclick="switchTab('pos')" id="nav-pos" class="sidebar-item w-full flex items-center px-6 py-3.5 text-sm font-semibold">
+                    <i class="fa-solid fa-cart-shopping w-6 text-lg"></i>
+                    <span>نقطة البيع</span>
+                </button>
+                <button onclick="switchTab('inventory')" id="nav-inventory" class="sidebar-item w-full flex items-center px-6 py-3.5 text-sm font-semibold">
+                    <i class="fa-solid fa-boxes-stacked w-6 text-lg"></i>
+                    <span>المخزون</span>
+                </button>
+                <button onclick="switchTab('products')" id="nav-products" class="sidebar-item w-full flex items-center px-6 py-3.5 text-sm font-semibold">
+                    <i class="fa-solid fa-list-check w-6 text-lg"></i>
+                    <span>الأصناف</span>
+                </button>
+                <button onclick="switchTab('invoices')" id="nav-invoices" class="sidebar-item w-full flex items-center px-6 py-3.5 text-sm font-semibold">
+                    <i class="fa-solid fa-file-invoice-dollar w-6 text-lg"></i>
+                    <span>الفواتير والأرباح</span>
+                </button>
+                <button onclick="switchTab('orders')" id="nav-orders" class="sidebar-item w-full flex items-center justify-between px-6 py-3.5 text-sm font-semibold">
+                    <div class="flex items-center gap-3">
+                        <i class="fa-solid fa-clipboard-list w-6 text-lg"></i>
+                        <span>الطلبات</span>
+                    </div>
+                    <span id="orders-badge" class="bg-rose-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">0</span>
+                </button>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-gray-800 text-center text-xs text-gray-500">
+            نور جروب للمبيعات — مصر<br>
+            <span class="text-gray-400 font-mono">v2.1.0 Pro — 2026</span>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-y-auto bg-[#f8fafc] dark:bg-gray-900 transition-colors duration-200">
+        
+        <!-- شريط علوي لإضافة زر الوضع الداكن/الفاتح -->
+        <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-3 flex justify-between items-center transition-colors duration-200">
+            <div class="text-sm font-bold text-gray-700 dark:text-gray-200">مرحباً بك، أحمد نور</div>
+            <button onclick="toggleDarkMode()" class="p-2 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-yellow-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition flex items-center gap-2 text-xs font-bold shadow-sm">
+                <i id="theme-icon" class="fa-solid fa-moon text-base"></i>
+                <span id="theme-text">الوضع الداكن</span>
+            </button>
+        </header>
+
+        <section id="tab-dashboard" class="p-6 space-y-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">لوحة التحكم</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">نظرة عامة على العمليات الماليّة والمبيعات</p>
+                </div>
+                <div id="current-date" class="bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg shadow-sm text-sm font-semibold text-gray-600 border border-gray-200"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+                <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex justify-between items-center">
                     <div>
-                        <h3>Nour Group ERP</h3>
-                        <p class="text-xs text-slate-400 font-normal">نور جروب — نظام المبيعات والمخزون</p>
+                        <p class="text-xs font-semibold text-gray-400">إجمالي المبيعات</p>
+                        <h3 id="dash-sales" class="text-2xl font-bold text-gray-800 dark:text-white mt-1">0.00 ج.م</h3>
+                        <p id="dash-invoices-count" class="text-xs text-gray-400 mt-1">0 فاتورة</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/40 text-blue-600 flex items-center justify-center text-xl"><i class="fa-solid fa-dollar-sign"></i></div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs font-semibold text-gray-400">إجمالي الأرباح</p>
+                        <h3 id="dash-profits" class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">0.00 ج.م</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 flex items-center justify-center text-xl"><i class="fa-solid fa-chart-line"></i></div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs font-semibold text-gray-400">إجمالي الوحدات في المخزن</p>
+                        <h3 id="dash-units" class="text-2xl font-bold text-gray-800 dark:text-white mt-1">0</h3>
+                        <p class="text-xs text-gray-400 mt-1">وحدة مسجلة</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-amber-50 dark:bg-amber-900/40 text-amber-600 flex items-center justify-center text-xl"><i class="fa-solid fa-box"></i></div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs font-semibold text-gray-400">عدد الأصناف</p>
+                        <h3 id="dash-items-count" class="text-2xl font-bold text-gray-800 dark:text-white mt-1">0</h3>
+                        <p id="dash-low-stock-count" class="text-xs text-rose-500 font-semibold mt-1">0 صنف منخفض</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 flex items-center justify-center text-xl"><i class="fa-solid fa-tags"></i></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <h3 class="font-bold text-gray-700 dark:text-gray-200 mb-4">توزيع المبيعات حسب الفئة</h3>
+                    <div class="h-64">
+                        <canvas id="categoryChart"></canvas>
                     </div>
                 </div>
-                <nav class="p-4 space-y-2">
-                    <a href="#" onclick="switchTab('pos')" class="tab-btn flex items-center gap-3 p-3 rounded-lg bg-blue-600 text-white font-medium transition"><i class="fa-solid fa-cash-register"></i> نقطة البيع</a>
-                    <a href="#" onclick="switchTab('inventory')" class="tab-btn flex items-center gap-3 p-3 rounded-lg hover:bg-slate-800 text-slate-300 transition"><i class="fa-solid fa-warehouse"></i> المخزون</a>
-                </nav>
-            </div>
-            <div class="p-4 border-t border-slate-800 text-xs text-slate-400 text-center">
-                نور جروب للمبيعات — مصر <br> v2.1.0 Pro — 2026
-            </div>
-        </aside>
 
-        <!-- Main Content -->
-        <main class="flex-1 flex flex-col overflow-y-auto">
-            <header class="bg-white dark:bg-slate-900 shadow-sm p-4 flex justify-between items-center transition-colors duration-200">
-                <h1 id="page-title" class="text-xl font-bold text-slate-800 dark:text-white">نقطة البيع</h1>
-                <div class="flex items-center gap-3">
-                    <!-- زر تبديل الوضع الداكن / الفاتح -->
-                    <button onclick="toggleDarkMode()" class="bg-gray-100 dark:bg-slate-800 p-2 rounded-full text-slate-700 dark:text-yellow-400 hover:bg-gray-200 dark:hover:bg-slate-700 transition" title="تبديل الوضع المظلم">
-                        <i id="theme-icon" class="fa-solid fa-moon"></i>
-                    </button>
-                    <span class="text-sm font-semibold bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-300 px-3 py-1.5 rounded-full">مدير النظام</span>
-                </div>
-            </header>
-
-            <div class="p-6">
-                <!-- POS Tab -->
-                <div id="tab-pos" class="tab-content grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 space-y-4">
-                        
-                        <!-- شريط البحث وزر الكاميرا -->
-                        <div class="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm flex gap-2 items-center transition-colors duration-200">
-                            <div class="relative flex-1">
-                                <span class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400">
-                                    <i class="fa-solid fa-magnifying-glass"></i>
-                                </span>
-                                <input type="text" id="pos-search" placeholder="اكتب الاسم، الكود، أو الباركود واستعرض الأصناف..." class="w-full border dark:border-slate-700 bg-transparent rounded-lg pr-10 pl-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                            </div>
-                            <button onclick="openScanner()" class="bg-emerald-600 text-white px-4 py-2.5 rounded-lg hover:bg-emerald-700 transition flex items-center gap-2 text-sm font-bold whitespace-nowrap shadow-sm">
-                                <i class="fa-solid fa-camera"></i> مسح بالكاميرا
-                            </button>
-                        </div>
-
-                        <!-- حاوية الكاميرا -->
-                        <div id="scanner-container" class="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-md hidden border-2 border-emerald-500 transition-colors duration-200">
-                            <div class="flex justify-between items-center mb-3">
-                                <h3 class="font-bold text-emerald-700 dark:text-emerald-400 text-sm flex items-center gap-2"><i class="fa-solid fa-barcode"></i> وجه الكاميرا نحو باركود المنتج</h3>
-                                <button onclick="closeScanner()" class="bg-red-100 text-red-600 hover:bg-red-200 px-3 py-1 rounded-lg text-xs font-bold transition">إغلاق <i class="fa-solid fa-xmark"></i></button>
-                            </div>
-                            <div id="reader" class="w-full max-w-sm mx-auto rounded-lg overflow-hidden"></div>
-                        </div>
-
-                        <!-- شبكة المنتجات -->
-                        <div class="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm transition-colors duration-200">
-                            <h3 class="font-bold mb-3 text-slate-700 dark:text-slate-200 text-sm">الأصناف المتاحة للبيع</h3>
-                            <div id="pos-products-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                                <!-- تملأ ديناميكياً -->
-                            </div>
+                <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-gray-700 dark:text-gray-200 mb-4">آخر الفواتير</h3>
+                        <div id="dash-recent-invoices" class="space-y-3">
+                            <p class="text-gray-400 text-sm text-center py-6">لا توجد فواتير سابقة</p>
                         </div>
                     </div>
+                    <button onclick="switchTab('invoices')" class="w-full py-2 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 text-blue-600 text-sm font-semibold rounded-lg mt-4 border border-gray-200">عرض جميع الفواتير</button>
+                </div>
+            </div>
+        </section>
 
-                    <!-- Cart Summary -->
-                    <div class="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm flex flex-col justify-between transition-colors duration-200">
+        <section id="tab-pos" class="hidden h-full flex flex-col lg:flex-row overflow-hidden">
+            <div class="flex-1 p-6 flex flex-col overflow-y-auto">
+                <div class="mb-4">
+                    <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-1">نقطة البيع (POS)</h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">أضف الأصناف بالفواتير بالبحث أو الكود أو الباركود</p>
+                    <div class="relative mt-3">
+                        <input type="text" id="pos-search" oninput="renderPosSearchResults()" placeholder="اكتب الاسم، الكود، أو الباركود واستعرض الأصناف..." class="w-full p-3 pr-10 rounded-xl border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 dark:text-white shadow-sm text-sm">
+                        <i class="fa-solid fa-magnifying-glass absolute top-3.5 right-3 text-gray-400"></i>
+                    </div>
+                </div>
+
+                <div id="pos-search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+            </div>
+
+            <div class="w-full lg:w-96 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-5 flex flex-col justify-between shadow-lg shrink-0 overflow-y-auto transition-colors duration-200">
+                <div>
+                    <div class="flex justify-between items-center border-b dark:border-gray-700 pb-3 mb-3">
+                        <h3 class="font-bold text-gray-800 dark:text-white text-lg">تفاصيل الفاتورة والسلة</h3>
+                        <button onclick="clearCart()" class="text-xs text-rose-500 hover:underline font-semibold">تفريغ السلة</button>
+                    </div>
+
+                    <div class="space-y-2 mb-4 bg-gray-50 dark:bg-gray-900 p-3 rounded-xl border border-gray-100 dark:border-gray-700 text-xs">
                         <div>
-                            <h3 class="font-bold mb-3 text-slate-700 dark:text-slate-200 border-b dark:border-slate-800 pb-2 text-sm">تفاصيل الفاتورة والسلة</h3>
-                            <div id="cart-items" class="space-y-3 max-h-80 overflow-y-auto mb-4">
-                                <p class="text-gray-400 text-center py-6 text-sm">الفاتورة فارغة — ابحث عن صنف أو انقر للإضافة</p>
+                            <label class="font-bold text-gray-600 dark:text-gray-300 block mb-1">اسم المشتري / العميل:</label>
+                            <input type="text" id="pos-buyer-name" placeholder="مثال: نقدي / اسم العميل" class="w-full p-2 rounded border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white dark:bg-gray-800 dark:text-white">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="font-bold text-gray-600 dark:text-gray-300 block mb-1">اسم البائع / الكاشير:</label>
+                                <input type="text" id="pos-seller-name" value="أحمد نور" placeholder="اسم البائع" class="w-full p-2 rounded border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white dark:bg-gray-800 dark:text-white">
+                            </div>
+                            <div>
+                                <label class="font-bold text-gray-600 dark:text-gray-300 block mb-1">طريقة الدفع:</label>
+                                <select id="pos-payment-method" class="w-full p-2 rounded border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white dark:bg-gray-800 dark:text-white">
+                                    <option value="نقداً (كاش)">نقداً (كاش)</option>
+                                    <option value="بطاقة (فيزا)">بطاقة (فيزا)</option>
+                                    <option value="تحويل بنكي">تحويل بنكي</option>
+                                    <option value="آجل">آجل (دين)</option>
+                                </select>
                             </div>
                         </div>
-                        <div class="border-t dark:border-slate-800 pt-4">
-                            <div class="flex justify-between text-base font-bold mb-4">
-                                <span>الإجمالي النهائي:</span>
-                                <span id="cart-total" class="text-blue-600 dark:text-blue-400">0.00 ج.م</span>
-                            </div>
-                            <button onclick="checkout()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 transition text-sm shadow">إتمام الدفع واستخراج الفاتورة</button>
-                        </div>
+                    </div>
+
+                    <div class="max-h-56 overflow-y-auto mb-4 divide-y divide-gray-100 dark:divide-gray-700" id="cart-items-container">
+                        <p class="text-gray-400 text-sm text-center py-10">الفاتورة فارغة — ابحث عن صنف أو انقر للإضافة</p>
                     </div>
                 </div>
 
-                <!-- Inventory Tab -->
-                <div id="tab-inventory" class="tab-content hidden space-y-4">
-                    <div class="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm flex justify-between items-center transition-colors duration-200">
-                        <h3 class="font-bold text-lg text-slate-700 dark:text-white">إدارة المخزون والأصناف</h3>
-                        <button onclick="addProductModal()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm"><i class="fa-solid fa-plus"></i> إضافة صنف جديد</button>
+                <div class="border-t dark:border-gray-700 pt-3 space-y-2 bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border border-gray-100 dark:border-gray-700">
+                    <div class="flex justify-between text-xs text-gray-600 dark:text-gray-300">
+                        <span>عدد الأصناف / القطع:</span>
+                        <span class="font-bold text-gray-800 dark:text-white" id="cart-items-count">0 صنف (0 قطعة)</span>
                     </div>
-                    <div class="bg-white dark:bg-slate-900 rounded-xl shadow-sm overflow-hidden transition-colors duration-200">
-                        <table class="w-full text-right border-collapse text-sm">
-                            <thead>
-                                <tr class="bg-gray-50 dark:bg-slate-800 border-b dark:border-slate-700 text-gray-600 dark:text-gray-300">
-                                    <th class="p-3">اسم المنتج</th>
-                                    <th class="p-3">الباركود / الكود</th>
-                                    <th class="p-3">السعر</th>
-                                    <th class="p-3">المخزون</th>
-                                    <th class="p-3">الإجراء</th>
-                                </tr>
-                            </thead>
-                            <tbody id="inventory-table-body"></tbody>
-                        </table>
+                    <div class="flex justify-between text-xs text-gray-600 dark:text-gray-300">
+                        <span>الإجمالي قبل الخصم:</span>
+                        <span class="font-bold text-gray-800 dark:text-white" id="cart-subtotal">0.00 ج.م</span>
                     </div>
+
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">الخصم الفوري:</label>
+                        <div class="flex gap-2">
+                            <input type="number" id="cart-discount-input" oninput="calculateCartTotals()" value="0" min="0" class="w-full p-2 text-sm rounded border border-gray-300 dark:border-gray-700 focus:outline-none bg-white dark:bg-gray-800 dark:text-white">
+                            <select id="cart-discount-type" onchange="calculateCartTotals()" class="p-2 text-sm rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-white">
+                                <option value="fixed">ج.م</option>
+                                <option value="percent">%</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-200 dark:border-gray-700 pt-2 flex justify-between items-center">
+                        <div>
+                            <p class="text-xs text-gray-500">الإجمالي النهائي</p>
+                            <p class="text-2xl font-black text-blue-600 dark:text-blue-400" id="cart-final-total">0.00 ج.م</p>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-xs text-gray-400">صافي الربح المتوقع</p>
+                            <p class="text-sm font-bold text-emerald-600 dark:text-emerald-400" id="cart-expected-profit">0.00 ج.م</p>
+                        </div>
+                    </div>
+
+                    <button onclick="checkout()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition duration-200 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>إتمام الدفع واستخرج الفاتورة</span>
+                    </button>
                 </div>
             </div>
-        </main>
+        </section>
+
+        <section id="tab-inventory" class="hidden p-6 space-y-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">إدارة المخزون</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">حالة مخزون المنتجات مع تحديث فوري وسلس</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center gap-3 pr-4 border-l border-gray-200 dark:border-gray-700">
+                    <div class="text-xl text-blue-600 dark:text-blue-400 font-black" id="inv-total-items">0</div>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">إجمالي الأصناف</span>
+                </div>
+                <div class="flex items-center gap-3 pr-4 border-l border-gray-200 dark:border-gray-700">
+                    <div class="text-xl text-emerald-600 dark:text-emerald-400 font-black" id="inv-total-quantity">0</div>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">إجمالي الوحدات بالمخزن</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="text-xl text-rose-600 dark:text-rose-400 font-black" id="inv-low-items">0</div>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">أصناف منخفضة (أقل من 10)</span>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex gap-4">
+                <input type="text" id="inv-search" oninput="renderInventoryTable()" placeholder="بحث بالاسم أو الكود..." class="flex-1 p-2.5 border dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-900 dark:text-white">
+                <select id="inv-filter" onchange="renderInventoryTable()" class="p-2.5 border dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-900 dark:text-white">
+                    <option value="all">جميع الأصناف</option>
+                    <option value="low">المخزون المنخفض فقط</option>
+                </select>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-x-auto">
+                <table class="w-full text-right text-sm">
+                    <thead class="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300 font-semibold border-b dark:border-gray-700">
+                        <tr>
+                            <th class="p-3.5">الكود</th>
+                            <th class="p-3.5">الصنف</th>
+                            <th class="p-3.5">الفئة</th>
+                            <th class="p-3.5">الوحدات المتوفرة</th>
+                            <th class="p-3.5">سعر البيع</th>
+                            <th class="p-3.5">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-table-body" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="tab-products" class="hidden p-6 space-y-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">دليل الأصناف والأسعار</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">تعديل الأسعار والمخزون، إضافة أو حذف أصناف</p>
+                </div>
+                <button onclick="openProductModal()" class="bg-purple-700 hover:bg-purple-800 text-white font-semibold px-4 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>إضافة صنف جديد</span>
+                </button>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <input type="text" id="prod-search" oninput="renderProductsTable()" placeholder="بحث باسم الصنف، الكود، الباركود، أو الفئة..." class="w-full p-2.5 border dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-900 dark:text-white">
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-x-auto">
+                <table class="w-full text-right text-sm">
+                    <thead class="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300 font-semibold border-b dark:border-gray-700">
+                        <tr>
+                            <th class="p-3.5">الكود</th>
+                            <th class="p-3.5">الباركود</th>
+                            <th class="p-3.5">الاسم</th>
+                            <th class="p-3.5">الفئة</th>
+                            <th class="p-3.5">السعر</th>
+                            <th class="p-3.5">التكلفة المتوقعة</th>
+                            <th class="p-3.5">المخزون</th>
+                            <th class="p-3.5 text-center">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="products-table-body" class="divide-y divide-gray-100 dark:divide-gray-700"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="tab-invoices" class="hidden p-6 space-y-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">سجل الفواتير والمبيعات</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">إدارة الفواتير — تعديل السعر واسم المشتري، أو حذف الفواتير مع استرداد المخزون تلقائياً</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                    <p class="text-xs text-gray-400 font-semibold">إجمالي الفواتير</p>
+                    <h4 id="inv-sum-count" class="text-2xl font-black text-gray-800 dark:text-white mt-1">0</h4>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                    <p class="text-xs text-gray-400 font-semibold">إجمالي المبيعات</p>
+                    <h4 id="inv-sum-sales" class="text-2xl font-black text-blue-600 dark:text-blue-400 mt-1">0.00 ج.م</h4>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                    <p class="text-xs text-gray-400 font-semibold">صافي الأرباح</p>
+                    <h4 id="inv-sum-profit" class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">0.00 ج.م</h4>
+                </div>
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
+                    <p class="text-xs text-gray-400 font-semibold">إجمالي الخصومات</p>
+                    <h4 id="inv-sum-discount" class="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1">0.00 ج.م</h4>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div class="p-4 border-b border-gray-100 dark:border-gray-700">
+                    <input type="text" id="invoices-search" oninput="renderInvoicesList()" placeholder="بحث باسم المشتري، البائع، أو رقم الفاتورة #..." class="w-full p-2.5 border dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-900 dark:text-white">
+                </div>
+                <div id="invoices-list-container" class="divide-y divide-gray-100 dark:divide-gray-700"></div>
+            </div>
+        </section>
+
+        <!-- قسم الطلبات الجديد -->
+        <section id="tab-orders" class="hidden p-6 space-y-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">إدارة الطلبات الواردة</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">استعراض ومراجعة الطلبات الواردة من البرنامج الخارجي (الموقع الإلكتروني)</p>
+                </div>
+                <button onclick="simulateIncomingOrder()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow">
+                    <i class="fa-solid fa-plus-circle"></i>
+                    <span>محاكاة طلب جديد (تجريبي)</span>
+                </button>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900">
+                    <h3 class="font-bold text-gray-700 dark:text-gray-200 text-sm">الطلبات المعلقة بانتظار الموافقة</h3>
+                    <span id="orders-count-label" class="text-xs text-gray-500 dark:text-gray-400 font-semibold">0 طلبات</span>
+                </div>
+                <div id="orders-list-container" class="divide-y divide-gray-100 dark:divide-gray-700">
+                    <p class="text-gray-400 text-sm text-center py-12">لا توجد طلبات معلقة حالياً</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modals -->
+    <div id="product-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-gray-800 dark:text-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b dark:border-gray-700 pb-3">
+                <h3 id="modal-title" class="font-bold text-gray-800 dark:text-white text-lg">تعديل الصنف</h3>
+                <button onclick="closeProductModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <form id="product-form" onsubmit="saveProduct(event)" class="space-y-3">
+                <input type="hidden" id="prod-id">
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">الكود</label>
+                    <input type="text" id="modal-code" required class="w-full p-2 border dark:border-gray-700 rounded text-sm mt-1 bg-white dark:bg-gray-900 dark:text-white">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">الباركود</label>
+                    <input type="text" id="modal-barcode" class="w-full p-2 border dark:border-gray-700 rounded text-sm mt-1 bg-white dark:bg-gray-900 dark:text-white">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">اسم الصنف</label>
+                    <input type="text" id="modal-name" required class="w-full p-2 border dark:border-gray-700 rounded text-sm mt-1 bg-white dark:bg-gray-900 dark:text-white">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">الفئة</label>
+                    <input type="text" id="modal-category" required class="w-full p-2 border dark:border-gray-700 rounded text-sm mt-1 bg-white dark:bg-gray-900 dark:text-white">
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">السعر (ج.م)</label>
+                        <input type="number" step="0.01" id="modal-price" required class="w-full p-2 border dark:border-gray-700 rounded text-sm mt-1 bg-white dark:bg-gray-900 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">التكلفة (ج.م)</label>
+                        <input type="number" step="0.01" id="modal-cost" required class="w-full p-2 border dark:border-gray-700 rounded text-sm mt-1 bg-white dark:bg-gray-900 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">المخزون</label>
+                        <input type="number" id="modal-stock" required class="w-full p-2 border dark:border-gray-700 rounded text-sm mt-1 bg-white dark:bg-gray-900 dark:text-white">
+                    </div>
+                </div>
+                <div class="pt-3 flex gap-2">
+                    <button type="submit" class="flex-1 py-2.5 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-lg text-sm">حفظ التعديلات</button>
+                    <button type="button" onclick="closeProductModal()" class="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 rounded-lg text-sm">إلغاء</button>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <!-- JavaScript Application Logic -->
+    <div id="delete-product-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-gray-800 dark:text-white rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
+            <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <h3 class="font-bold text-gray-800 dark:text-white text-lg">حذف الصنف نهائياً</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-300">هل أنت متأكد من حذف الصنف <span id="delete-prod-name" class="font-bold text-gray-800 dark:text-white"></span>؟ لا يمكن التراجع عن هذا الإجراء.</p>
+            <div class="flex gap-2 pt-2">
+                <button id="confirm-delete-prod-btn" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-sm">تأكيد الحذف</button>
+                <button onclick="closeDeleteProductModal()" class="flex-1 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 font-semibold rounded-xl text-sm">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-gray-800 dark:text-white rounded-2xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
+            <div class="w-12 h-12 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <h3 class="font-bold text-gray-800 dark:text-white text-lg">حذف الفاتورة وإعادة المخزون</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-300">هل أنت متأكد من حذف الفاتورة <span id="delete-inv-id" class="font-bold text-gray-800 dark:text-white"></span>؟ سيتم **إعادة الأصناف المباعة بها إلى المخزون** تلقائياً.</p>
+            <div class="flex gap-2 pt-2">
+                <button id="confirm-delete-btn" class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-sm">تأكيد الحذف والإعادة</button>
+                <button onclick="closeDeleteModal()" class="flex-1 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 font-semibold rounded-xl text-sm">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-invoice-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-gray-800 dark:text-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b dark:border-gray-700 pb-3">
+                <h3 class="font-bold text-gray-800 dark:text-white text-lg">تعديل الفاتورة <span id="edit-inv-id-display" class="text-blue-600"></span></h3>
+                <button onclick="closeEditInvoiceModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <form id="edit-invoice-form" onsubmit="saveInvoiceEdits(event)" class="space-y-3">
+                <input type="hidden" id="edit-inv-id">
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">اسم المشتري / العميل</label>
+                    <input type="text" id="edit-inv-buyer" required class="w-full p-2 border dark:border-gray-700 rounded text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-gray-900 dark:text-white">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">اسم البائع / الكاشير</label>
+                    <input type="text" id="edit-inv-seller" required class="w-full p-2 border dark:border-gray-700 rounded text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-gray-900 dark:text-white">
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">طريقة الدفع</label>
+                    <select id="edit-inv-payment" class="w-full p-2 border dark:border-gray-700 rounded text-sm mt-1 focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-gray-900 dark:text-white">
+                        <option value="نقداً (كاش)">نقداً (كاش)</option>
+                        <option value="بطاقة (فيزا)">بطاقة (فيزا)</option>
+                        <option value="تحويل بنكي">تحويل بنكي</option>
+                        <option value="آجل">آجل (دين)</option>
+                    </select>
+                </div>
+                <div class="pt-3 flex gap-2">
+                    <button type="submit" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm">حفظ البيانات والتعديلات</button>
+                    <button type="button" onclick="closeEditInvoiceModal()" class="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 rounded-lg text-sm">إلغاء</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="print-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl flex flex-col justify-between">
+            <div id="printable-invoice" class="text-right text-xs text-gray-800 dark:text-gray-100 space-y-3 border dark:border-gray-700 p-4 rounded-xl bg-white dark:bg-gray-900"></div>
+            <div class="flex gap-2 mt-4">
+                <button onclick="window.print()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-print"></i>
+                    <span>طباعة الفاتورة</span>
+                </button>
+                <button onclick="closePrintModal()" class="px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-200 font-semibold rounded-xl text-sm">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        let products = JSON.parse(localStorage.getItem('erp_products')) || [
-            { id: 1001, name: 'شاي العروسة ناعم - 40 جم', barcode: '6221001', price: 12, stock: 79 },
-            { id: 1002, name: 'شاي العروسة ناعم - 100 جم', barcode: '6221002', price: 28, stock: 87 },
-            { id: 1003, name: 'شاي العروسة ناعم - 250 جم', barcode: '6221003', price: 65, stock: 33 },
-            { id: 1004, name: 'شاي العروسة فتلة - 25 فتلة', barcode: '6221004', price: 22, stock: 21 }
+        // Default Products Data Imported directly from spreadsheet CSV
+        const defaultProducts = [
+            { id: 1001, code: "1001", barcode: "6222002300016", name: "شاي العروسة ناعم - 40 جم", category: "شاي ناعم", price: 12, cost: 9.6, stock: 2 },
+            { id: 1002, code: "1002", barcode: "6222002300023", name: "شاي العروسة ناعم - 100 جم", category: "شاي ناعم", price: 28, cost: 22.4, stock: 88 },
+            { id: 1003, code: "1003", barcode: "6222002300030", name: "شاي العروسة ناعم - 250 جم", category: "شاي ناعم", price: 65, cost: 52, stock: 34 },
+            { id: 1004, code: "1004", barcode: "6222002300122", name: "شاي العروسة فتلة - 25 فتلة", category: "شاي فتلة", price: 22, cost: 17.6, stock: 22 },
+            { id: 1005, code: "1005", barcode: "6222002300153", name: "شاي العروسة فتلة - 100 فتلة", category: "شاي فتلة", price: 75, cost: 60, stock: 15 },
+            { id: 1006, code: "1006", barcode: "6221048700415", name: "شاي ليبتون أسود ناعم - 40 جم", category: "شاي ناعم", price: 15, cost: 12, stock: 48 },
+            { id: 1007, code: "1007", barcode: "6221048700439", name: "شاي ليبتون أسود ناعم - 100 جم", category: "شاي ناعم", price: 35, cost: 28, stock: 53 },
+            { id: 1008, code: "1008", barcode: "5063305009548", name: "شاي ليبتون أسود ناعم - 250 جم", category: "شاي ناعم", price: 80, cost: 64, stock: 30 },
+            { id: 1009, code: "1009", barcode: "6221048700118", name: "شاي ليبتون فتلة - 25 فتلة", category: "شاي فتلة", price: 28, cost: 22.4, stock: 65 },
+            { id: 1010, code: "1010", barcode: "6221048700736", name: "شاي ليبتون فتلة - 100 فتلة", category: "شاي فتلة", price: 95, cost: 76, stock: 33 },
+            { id: 1011, code: "1011", barcode: "6221048701108", name: "شاي ليبتون أخضر فتلة - 25 فتلة", category: "شاي أخضر", price: 32, cost: 25.6, stock: 20 },
+            { id: 1012, code: "1012", barcode: "6223006100125", name: "شاي أحمد تي أسود (أوراق كاملة) - 100 جم", category: "شاي فاخر", price: 65, cost: 52, stock: 100 },
+            { id: 1013, code: "1013", barcode: "6223006100156", name: "شاي أحمد تي إيرل جراي - 100 جم", category: "شاي فاخر", price: 70, cost: 56, stock: 85 },
+            { id: 1014, code: "1014", barcode: "6223006100224", name: "شاي أحمد تي أخضر فتلة - 25 فتلة", category: "شاي أخضر", price: 45, cost: 36, stock: 12 },
+            { id: 1015, code: "1015", barcode: "6224001200119", name: "شاي الربيع إكسبريس فتلة - 100 فتلة", category: "شاي فتلة", price: 85, cost: 68, stock: 14 },
+            { id: 1016, code: "1016", barcode: "6224001200140", name: "شاي الربيع أوراق كاملة - 200 جم", category: "شاي فاخر", price: 90, cost: 72, stock: 57 },
+            { id: 1017, code: "1017", barcode: "6224001200256", name: "شاي الربيع أوراق بالنعناع - 300 جم", category: "شاي بالنعناع", price: 105, cost: 84, stock: 70 },
+            { id: 1018, code: "1018", barcode: "6224001200287", name: "شاي الربيع أوراق الجوافة - 100 جم", category: "شاي ناعم", price: 200, cost: 160, stock: 40 },
+            { id: 1019, code: "1019", barcode: "6221000001001", name: "شيبسي - طماطم", category: "عائلي", price: 10, cost: 8, stock: 30 },
+            { id: 1020, code: "1020", barcode: "6221000001002", name: "شيبسي - جبنة متبلة", category: "عائلي", price: 10, cost: 8, stock: 40 },
+            { id: 1021, code: "1021", barcode: "6221000001003", name: "شيبسي - شطة وليمون", category: "عائلي", price: 10, cost: 8, stock: 8 },
+            { id: 1022, code: "1022", barcode: "6221000001004", name: "شيبسي - ملح", category: "وسط", price: 5, cost: 4, stock: 84 },
+            { id: 1023, code: "1023", barcode: "6221000001005", name: "شيبسي - كباب", category: "وسط", price: 5, cost: 4, stock: 250 },
+            { id: 1024, code: "1024", barcode: "6221000001006", name: "تايجر - جبنة", category: "كبير", price: 7, cost: 5.6, stock: 221 },
+            { id: 1025, code: "1025", barcode: "6221000001007", name: "تايجر - شطة وليمون", category: "كبير", price: 7, cost: 5.6, stock: 33 },
+            { id: 1026, code: "1026", barcode: "6221000001008", name: "تايجر - طماطم", category: "صغير", price: 3, cost: 2.4, stock: 445 },
+            { id: 1027, code: "1027", barcode: "6221000001009", name: "لايز - ملح كلاسيك", category: "عائلي", price: 15, cost: 12, stock: 14 },
+            { id: 1028, code: "1028", barcode: "6221000001010", name: "لايز - خل وملح", category: "عائلي", price: 15, cost: 12, stock: 221 },
+            { id: 1029, code: "1029", barcode: "6221000001011", name: "دوريتوس - جبنة ناتشو", category: "كبير", price: 10, cost: 8, stock: 99 },
+            { id: 1030, code: "1030", barcode: "6221000001012", name: "دوريتوس - فلفل حلو", category: "كبير", price: 10, cost: 8, stock: 100 },
+            { id: 1031, code: "1031", barcode: "6221000001013", name: "دوريتوس - حار نار", category: "وسط", price: 5, cost: 4, stock: 883 },
+            { id: 1032, code: "1032", barcode: "6221000001014", name: "شيتوس - كرنشي جبنة", category: "كبير", price: 8, cost: 6.4, stock: 337 },
+            { id: 1033, code: "1033", barcode: "6221000001015", name: "شيتوس - حار نار", category: "كبير", price: 8, cost: 6.4, stock: 60 },
+            { id: 1034, code: "1034", barcode: "6221000001016", name: "بيك رولز - بيتزا", category: "وسط", price: 7, cost: 5.6, stock: 255 },
+            { id: 1035, code: "1035", barcode: "6221000001017", name: "بيك رولز - كاتشب", category: "وسط", price: 7, cost: 5.6, stock: 554 },
+            { id: 1036, code: "1036", barcode: "6221000001018", name: "فوكس - جبنة فرنسية", category: "وسط", price: 4, cost: 3.2, stock: 228 },
+            { id: 1037, code: "1037", barcode: "6221000001019", name: "فوكس - طماطم", category: "وسط", price: 4, cost: 3.2, stock: 111 },
+            { id: 1038, code: "1038", barcode: "6221000001020", name: "ويندوز - جبنة", category: "صغير", price: 10, cost: 8, stock: 333 },
+            { id: 1039, code: "1039", barcode: "6222001010013", name: "وفير سائل غسيل أطباق بالليمون - 1 لتر", category: "منظف أواني", price: 65, cost: 52, stock: 889 },
+            { id: 1040, code: "1040", barcode: "6222001010030", name: "بريل سائل غسيل أواني مركز - 1 لتر", category: "منظف أواني", price: 22, cost: 17.6, stock: 677 },
+            { id: 1041, code: "1041", barcode: "6222001010037", name: "بريل سائل غسيل أواني - 600 مل", category: "منظف أواني", price: 38, cost: 30.4, stock: 223 },
+            { id: 1042, code: "1042", barcode: "6222001010044", name: "فيرا سائل غسيل أواني بالليمون - 2.5 لتر", category: "منظف أواني", price: 25, cost: 20, stock: 558 },
+            { id: 1043, code: "1043", barcode: "6222001010051", name: "فيري سائل غسيل أطباق للأيد الحساسة - 650 مل", category: "منظف أواني", price: 45, cost: 36, stock: 44 },
+            { id: 1044, code: "1044", barcode: "6222001010068", name: "أريال أوتوماتيك بودرة بالافندر - 4 كجم", category: "مسحوق غسيل", price: 200, cost: 160, stock: 33 },
+            { id: 1045, code: "1045", barcode: "6222002020012", name: "أريال أوتوماتيك جيل للغسالات - 2.5 لتر", category: "مسحوق غسيل", price: 240, cost: 192, stock: 99 },
+            { id: 1046, code: "1046", barcode: "6222002020029", name: "تايد أوتوماتيك بودرة للغسالات - 5 كجم", category: "مسحوق غسيل", price: 185, cost: 148, stock: 200 },
+            { id: 1047, code: "1047", barcode: "6222002020036", name: "تايد أوتوماتيك جيل بالياسمين - 2.5 لتر", category: "مسحوق غسيل", price: 220, cost: 176, stock: 70 },
+            { id: 1048, code: "1048", barcode: "6222002020043", name: "أوكسي أوتوماتيك بودرة بالافندر - 4.25 كجم", category: "مسحوق غسيل", price: 160, cost: 128, stock: 116 },
+            { id: 1049, code: "1049", barcode: "6222002020060", name: "أوكسي يدوي/عادي بودرة - 1 كجم", category: "مسحوق غسيل", price: 195, cost: 156, stock: 336 },
+            { id: 1050, code: "1050", barcode: "6222002020067", name: "برسيل أوتوماتيك بودرة - 5 كجم", category: "مسحوق غسيل", price: 38, cost: 30.4, stock: 390 },
+            { id: 1051, code: "1051", barcode: "6222002020074", name: "برسيل جيل أوتوماتيك برائحة النظافة - 3.9 لتر", category: "مسحوق غسيل", price: 230, cost: 184, stock: 229 },
+            { id: 1052, code: "1052", barcode: "6222002020081", name: "برسيل أسود (بلاك) للعبايات والملابس الداكنة - 2.5 لتر", category: "مسحوق غسيل", price: 180, cost: 144, stock: 150 },
+            { id: 1060, code: "1060", barcode: "6222004040041", name: "كلوركس ألوان للملابس الملونة - 1 لتر", category: "مطهرات وبياض", price: 22, cost: 17.6, stock: 100 },
+            { id: 1061, code: "1061", barcode: "6222004040058", name: "كلوركس 5 في 1 منظف أرضيات برائحة الصنوبر - 1.5 لتر", category: "العناية بالملابس", price: 35, cost: 28, stock: 203 },
+            { id: 1062, code: "1062", barcode: "6222004040065", name: "جلانس منظف وملمع زجاج - 600 مل (بخاخ)", category: "منظف أرضيات", price: 48, cost: 38.4, stock: 224 },
+            { id: 1063, code: "1063", barcode: "6222005050019", name: "سيـف (Cif) كريم منظف أسطح ودهون - 500 مل", category: "ملمع زجاج", price: 28, cost: 22.4, stock: 299 },
+            { id: 1064, code: "1064", barcode: "6222005050026", name: "ستريس مزيل دهون المطبخ والبوتجاز - 700 مل", category: "مذيب دهون", price: 55, cost: 44, stock: 500 },
+            { id: 1065, code: "1065", barcode: "6222005050033", name: "هاربيك منظف ومطهر التواليت - 700 مل", category: "مذيب دهون", price: 60, cost: 48, stock: 699 }
         ];
 
+        // System State Variables
+        let products = [];
         let cart = [];
-        let html5QrCode = null;
+        let invoices = [];
+        let orders = []; 
+        let selectedProductToDelete = null;
+        let selectedInvoiceToDelete = null;
+        let categoryChartInstance = null;
 
-        // ميزة الوضع الداكن/الفاتح
+        // On Page Initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            initStorage();
+            updateCurrentDate();
+            renderDashboard();
+            renderPosSearchResults();
+            renderInventoryTable();
+            renderProductsTable();
+            renderInvoicesList();
+            renderOrdersList();
+        });
+
+        // Dark/Light Mode Logic
+        function initTheme() {
+            const savedTheme = localStorage.getItem('nour_erp_theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.getElementById('theme-icon').className = 'fa-solid fa-sun text-base text-yellow-400';
+                document.getElementById('theme-text').innerText = 'الوضع الفاتح';
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('theme-icon').className = 'fa-solid fa-moon text-base';
+                document.getElementById('theme-text').innerText = 'الوضع الداكن';
+            }
+        }
+
         function toggleDarkMode() {
             const html = document.documentElement;
             const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+
             if (html.classList.contains('dark')) {
                 html.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-                icon.className = 'fa-solid fa-moon';
+                localStorage.setItem('nour_erp_theme', 'light');
+                icon.className = 'fa-solid fa-moon text-base';
+                text.innerText = 'الوضع الداكن';
             } else {
                 html.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-                icon.className = 'fa-solid fa-sun';
+                localStorage.setItem('nour_erp_theme', 'dark');
+                icon.className = 'fa-solid fa-sun text-base text-yellow-400';
+                text.innerText = 'الوضع الفاتح';
             }
         }
 
-        // استرجاع الثيم عند التحميل
-        if (localStorage.getItem('theme') === 'dark') {
-            document.documentElement.classList.add('dark');
-            document.getElementById('theme-icon').className = 'fa-solid fa-sun';
+        // Initialize Local Storage
+        function initStorage() {
+            const savedProducts = localStorage.getItem('nour_erp_products');
+            if (savedProducts) {
+                products = JSON.parse(savedProducts);
+            } else {
+                products = [...defaultProducts];
+                saveProductsToStorage();
+            }
+
+            const savedInvoices = localStorage.getItem('nour_erp_invoices');
+            if (savedInvoices) {
+                invoices = JSON.parse(savedInvoices);
+            } else {
+                invoices = [];
+                saveInvoicesToStorage();
+            }
+
+            const savedOrders = localStorage.getItem('nour_erp_orders');
+            if (savedOrders) {
+                orders = JSON.parse(savedOrders);
+            } else {
+                orders = [
+                    {
+                        id: "9001",
+                        date: new Date().toISOString(),
+                        buyerName: "محمد إبراهيم (موقع)",
+                        sellerName: "أونلاين",
+                        paymentMethod: "تحويل بنكي",
+                        items: [
+                            { id: 1002, name: "شاي العروسة ناعم - 100 جم", category: "شاي ناعم", price: 28, cost: 22.4, quantity: 2 }
+                        ],
+                        subtotal: 56,
+                        discount: 0,
+                        finalTotal: 56,
+                        profit: 11.2
+                    }
+                ];
+                saveOrdersToStorage();
+            }
         }
 
-        function saveProducts() {
-            localStorage.setItem('erp_products', JSON.stringify(products));
+        function saveProductsToStorage() {
+            localStorage.setItem('nour_erp_products', JSON.stringify(products));
         }
 
+        function saveInvoicesToStorage() {
+            localStorage.setItem('nour_erp_invoices', JSON.stringify(invoices));
+        }
+
+        function saveOrdersToStorage() {
+            localStorage.setItem('nour_erp_orders', JSON.stringify(orders));
+            updateOrdersBadge();
+        }
+
+        function updateOrdersBadge() {
+            const badge = document.getElementById('orders-badge');
+            badge.innerText = orders.length;
+            if (orders.length === 0) {
+                badge.classList.add('hidden');
+            } else {
+                badge.classList.remove('hidden');
+            }
+        }
+
+        function updateCurrentDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const today = new Date().toLocaleDateString('ar-EG', options);
+            document.getElementById('current-date').innerText = today;
+        }
+
+        // Tab Navigation
         function switchTab(tabId) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            ['dashboard', 'pos', 'inventory', 'products', 'invoices', 'orders'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`nav-${t}`).classList.remove('active');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            document.getElementById(`nav-${tabId}`).classList.add('active');
+
+            if (tabId === 'dashboard') renderDashboard();
+            if (tabId === 'pos') renderPosSearchResults();
+            if (tabId === 'inventory') renderInventoryTable();
+            if (tabId === 'products') renderProductsTable();
+            if (tabId === 'invoices') renderInvoicesList();
+            if (tabId === 'orders') renderOrdersList();
+        }
+
+        // Toast Notification System
+        function showToast(msg, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-emerald-600' : (type === 'error' ? 'bg-rose-600' : 'bg-blue-600');
             
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('bg-blue-600', 'text-white');
-                btn.classList.add('hover:bg-slate-800', 'text-slate-300');
-            });
-            event.currentTarget.classList.add('bg-blue-600', 'text-white');
-            event.currentTarget.classList.remove('hover:bg-slate-800', 'text-slate-300');
+            toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 text-sm font-semibold transition-all duration-300 pointer-events-auto`;
+            toast.innerHTML = `
+                <i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-exclamation'} text-lg"></i>
+                <span>${msg}</span>
+            `;
 
-            if(tabId === 'inventory') renderInventory();
-            if(tabId === 'pos') renderPOSProducts();
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-x-5');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
 
-        function renderPOSProducts() {
-            const grid = document.getElementById('pos-products-grid');
-            grid.innerHTML = '';
-            products.forEach(p => {
-                grid.innerHTML += `
-                    <div class="bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-3 rounded-xl hover:border-blue-500 transition flex flex-col justify-between">
+        // Render Dashboard Stats & Charts
+        function renderDashboard() {
+            const totalSales = invoices.reduce((sum, i) => sum + (i.finalTotal || 0), 0);
+            const totalProfit = invoices.reduce((sum, i) => sum + (i.profit || 0), 0);
+            const totalUnits = products.reduce((sum, p) => sum + (p.stock || 0), 0);
+            const lowStockCount = products.filter(p => p.stock <= 10).length;
+
+            document.getElementById('dash-sales').innerText = totalSales.toFixed(2) + ' ج.م';
+            document.getElementById('dash-invoices-count').innerText = invoices.length + ' فاتورة';
+            document.getElementById('dash-profits').innerText = totalProfit.toFixed(2) + ' ج.م';
+            document.getElementById('dash-units').innerText = totalUnits.toLocaleString('ar-EG');
+            document.getElementById('dash-items-count').innerText = products.length;
+            document.getElementById('dash-low-stock-count').innerText = lowStockCount + ' صنف منخفض';
+
+            const categoryMap = {};
+            invoices.forEach(inv => {
+                if (inv.items) {
+                    inv.items.forEach(item => {
+                        categoryMap[item.category] = (categoryMap[item.category] || 0) + (item.price * item.quantity);
+                    });
+                }
+            });
+
+            const labels = Object.keys(categoryMap);
+            const data = Object.values(categoryMap);
+
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            if (categoryChartInstance) categoryChartInstance.destroy();
+
+            categoryChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels.length ? labels : ['لا يوجد مبيعات'],
+                    datasets: [{
+                        label: 'إجمالي المبيعات (ج.م)',
+                        data: data.length ? data : [0],
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            const recentContainer = document.getElementById('dash-recent-invoices');
+            const recent = invoices.slice(-4).reverse();
+            if (recent.length === 0) {
+                recentContainer.innerHTML = '<p class="text-gray-400 text-sm text-center py-6">لا توجد فواتير سابقة</p>';
+            } else {
+                recentContainer.innerHTML = recent.map(i => `
+                    <div class="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg text-xs">
                         <div>
-                            <div class="flex justify-between items-start mb-1">
-                                <span class="text-[10px] bg-gray-200 dark:bg-slate-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded">كود: ${p.id}</span>
-                                <span class="text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 rounded font-bold">مخزون: ${p.stock}</span>
-                            </div>
-                            <h4 class="font-bold text-slate-800 dark:text-white text-sm mt-1">${p.name}</h4>
+                            <span class="font-bold text-gray-800 dark:text-white">#${i.id}</span>
+                            <span class="text-gray-500 mr-2">${i.buyerName || 'نقدي'}</span>
                         </div>
-                        <div class="mt-3 flex justify-between items-center pt-2 border-t border-gray-200 dark:border-slate-700">
-                            <span class="text-blue-600 dark:text-blue-400 font-bold text-sm">${p.price.toFixed(2)} ج.م</span>
-                            <button onclick="addToCart(${p.id})" class="bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-300 hover:bg-blue-600 hover:text-white px-3 py-1 rounded-lg text-xs font-bold transition">
-                                <i class="fa-solid fa-plus"></i> إضافة
-                            </button>
-                        </div>
+                        <span class="font-bold text-blue-600 dark:text-blue-400">${i.finalTotal.toFixed(2)} ج.م</span>
                     </div>
-                `;
-            });
+                `).join('');
+            }
         }
 
-        function addToCart(productId) {
-            const product = products.find(p => p.id === productId);
-            if (!product || product.stock <= 0) {
-                alert('عذراً، هذا المنتج نفد من المخزون!');
+        // POS Search & Render
+        function renderPosSearchResults() {
+            const query = document.getElementById('pos-search').value.trim().toLowerCase();
+            const container = document.getElementById('pos-search-results');
+
+            const filtered = products.filter(p => 
+                p.name.toLowerCase().includes(query) ||
+                p.code.toLowerCase().includes(query) ||
+                (p.barcode && p.barcode.toLowerCase().includes(query)) ||
+                p.category.toLowerCase().includes(query)
+            );
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="col-span-full text-center py-12 text-gray-400 text-sm">لم يتم العثور على أية أصناف مطابقة</div>';
                 return;
             }
-            const cartItem = cart.find(item => item.id === productId);
-            if (cartItem) {
-                if (cartItem.qty < product.stock) {
-                    cartItem.qty++;
-                } else {
-                    alert('الكمية المطلوبة تتجاوز المخزون المتاح.');
-                }
-            } else {
-                cart.push({ ...product, qty: 1 });
+
+            container.innerHTML = filtered.map(prod => `
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between hover:border-blue-300 transition">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs bg-gray-100 dark:bg-gray-700 font-bold px-2 py-0.5 rounded text-gray-600 dark:text-gray-300">كود: ${prod.code}</span>
+                            <span class="text-xs ${prod.stock <= 10 ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-700'} font-bold px-2 py-0.5 rounded">مخزون: ${prod.stock}</span>
+                        </div>
+                        <h4 class="font-bold text-gray-800 dark:text-white text-sm mb-1">${prod.name}</h4>
+                        <p class="text-xs text-gray-400 mb-3">${prod.category}</p>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t dark:border-gray-700">
+                        <span class="text-lg font-black text-blue-600 dark:text-blue-400">${prod.price.toFixed(2)} ج.م</span>
+                        <button onclick="addToCart(${prod.id})" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1">
+                            <i class="fa-solid fa-plus"></i> إضافة
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Cart Logic
+        function addToCart(prodId) {
+            const prod = products.find(p => p.id === prodId);
+            if (!prod) return;
+
+            if (prod.stock <= 0) {
+                showToast(`الصنف (${prod.name}) غير متوفر بالمخزن!`, 'error');
+                return;
             }
+
+            const cartItem = cart.find(c => c.id === prodId);
+            if (cartItem) {
+                if (cartItem.quantity + 1 > prod.stock) {
+                    showToast(`الكمية المطلوبة تتجاوز المتاح بمخزن (${prod.name})`, 'error');
+                    return;
+                }
+                cartItem.quantity++;
+            } else {
+                cart.push({ ...prod, quantity: 1 });
+            }
+
+            renderCart();
+            showToast(`تمت إضافة ${prod.name} إلى الفاتورة`, 'success');
+        }
+
+        function updateCartQty(prodId, newQty) {
+            const prod = products.find(p => p.id === prodId);
+            const cartItem = cart.find(c => c.id === prodId);
+            
+            if (!cartItem) return;
+
+            if (newQty <= 0) {
+                cart = cart.filter(c => c.id !== prodId);
+            } else {
+                if (prod && newQty > prod.stock) {
+                    showToast(`المخزون المتاح فقط هو ${prod.stock} قطعة`, 'error');
+                    cartItem.quantity = prod.stock;
+                } else {
+                    cartItem.quantity = newQty;
+                }
+            }
+            renderCart();
+        }
+
+        function clearCart() {
+            cart = [];
             renderCart();
         }
 
         function renderCart() {
-            const container = document.getElementById('cart-items');
+            const container = document.getElementById('cart-items-container');
+
             if (cart.length === 0) {
-                container.innerHTML = `<p class="text-gray-400 text-center py-6 text-sm">الفاتورة فارغة — ابحث عن صنف أو انقر للإضافة</p>`;
-                document.getElementById('cart-total').innerText = '0.00 ج.م';
+                container.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">الفاتورة فارغة — ابحث عن صنف أو انقر للإضافة</p>';
+                calculateCartTotals();
                 return;
             }
-            container.innerHTML = '';
-            let total = 0;
-            cart.forEach((item, index) => {
-                total += item.price * item.qty;
-                container.innerHTML += `
-                    <div class="flex justify-between items-center bg-gray-50 dark:bg-slate-800 p-2.5 rounded-lg border dark:border-slate-700 text-xs">
-                        <div>
-                            <h5 class="font-bold text-slate-800 dark:text-white">${item.name}</h5>
-                            <span class="text-gray-500 dark:text-gray-400">${item.price} ج.م × ${item.qty}</span>
+
+            container.innerHTML = cart.map(item => `
+                <div class="py-2.5 flex justify-between items-center text-xs">
+                    <div class="flex-1 pr-1">
+                        <p class="font-bold text-gray-800 dark:text-white line-clamp-1">${item.name}</p>
+                        <p class="text-gray-400">${item.price.toFixed(2)} ج.م / قطعة</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center border dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 overflow-hidden">
+                            <button onclick="updateCartQty(${item.id}, ${item.quantity - 1})" class="px-2 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">-</button>
+                            <span class="px-2 font-bold dark:text-white">${item.quantity}</span>
+                            <button onclick="updateCartQty(${item.id}, ${item.quantity + 1})" class="px-2 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">+</button>
                         </div>
-                        <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700 p-1"><i class="fa-solid fa-trash"></i></button>
+                        <span class="font-bold text-blue-600 dark:text-blue-400 w-16 text-left">${(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                </div>
+            `).join('');
+
+            calculateCartTotals();
+        }
+
+        function calculateCartTotals() {
+            const totalItemsCount = cart.reduce((sum, i) => sum + i.quantity, 0);
+            const subtotal = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+            const totalCost = cart.reduce((sum, i) => sum + (i.cost * i.quantity), 0);
+
+            const discountInput = parseFloat(document.getElementById('cart-discount-input').value) || 0;
+            const discountType = document.getElementById('cart-discount-type').value;
+
+            let discountVal = 0;
+            if (discountType === 'percent') {
+                discountVal = (subtotal * discountInput) / 100;
+            } else {
+                discountVal = discountInput;
+            }
+
+            const finalTotal = Math.max(0, subtotal - discountVal);
+            const expectedProfit = Math.max(0, finalTotal - totalCost);
+
+            document.getElementById('cart-items-count').innerText = `${cart.length} صنف (${totalItemsCount} قطعة)`;
+            document.getElementById('cart-subtotal').innerText = subtotal.toFixed(2) + ' ج.م';
+            document.getElementById('cart-final-total').innerText = finalTotal.toFixed(2) + ' ج.م';
+            document.getElementById('cart-expected-profit').innerText = expectedProfit.toFixed(2) + ' ج.م';
+        }
+
+        // Checkout & Export Invoice
+        function checkout() {
+            if (cart.length === 0) {
+                showToast('السلة فارغة، يرجى إضافة أصناف أولاً', 'error');
+                return;
+            }
+
+            const buyerName = document.getElementById('pos-buyer-name').value.trim() || 'عميل نقدي';
+            const sellerName = document.getElementById('pos-seller-name').value.trim() || 'أحمد نور';
+            const paymentMethod = document.getElementById('pos-payment-method').value;
+
+            const subtotal = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+            const totalCost = cart.reduce((sum, i) => sum + (i.cost * i.quantity), 0);
+            const discountInput = parseFloat(document.getElementById('cart-discount-input').value) || 0;
+            const discountType = document.getElementById('cart-discount-type').value;
+
+            let discountVal = 0;
+            if (discountType === 'percent') {
+                discountVal = (subtotal * discountInput) / 100;
+            } else {
+                discountVal = discountInput;
+            }
+
+            const finalTotal = Math.max(0, subtotal - discountVal);
+            const profit = Math.max(0, finalTotal - totalCost);
+
+            const newInvoice = {
+                id: Date.now().toString().slice(-6),
+                date: new Date().toISOString(),
+                buyerName: buyerName,
+                sellerName: sellerName,
+                paymentMethod: paymentMethod,
+                items: JSON.parse(JSON.stringify(cart)),
+                subtotal: subtotal,
+                discount: discountVal,
+                finalTotal: finalTotal,
+                profit: profit
+            };
+
+            cart.forEach(cartItem => {
+                const prod = products.find(p => p.id === cartItem.id);
+                if (prod) {
+                    prod.stock -= cartItem.quantity;
+                }
+            });
+
+            invoices.push(newInvoice);
+            saveProductsToStorage();
+            saveInvoicesToStorage();
+
+            openPrintModal(newInvoice);
+
+            cart = [];
+            document.getElementById('pos-buyer-name').value = '';
+            document.getElementById('cart-discount-input').value = '0';
+            renderCart();
+            renderPosSearchResults();
+
+            showToast(`تم استخراج وإصدار الفاتورة رقم #${newInvoice.id} بنجاح!`, 'success');
+        }
+
+        // Inventory Render
+        function renderInventoryTable() {
+            const query = document.getElementById('inv-search').value.trim().toLowerCase();
+            const filter = document.getElementById('inv-filter').value;
+            const tbody = document.getElementById('inventory-table-body');
+
+            let filtered = products.filter(p => 
+                p.name.toLowerCase().includes(query) ||
+                p.code.toLowerCase().includes(query)
+            );
+
+            if (filter === 'low') {
+                filtered = filtered.filter(p => p.stock <= 10);
+            }
+
+            document.getElementById('inv-total-items').innerText = products.length;
+            document.getElementById('inv-total-quantity').innerText = products.reduce((sum, p) => sum + p.stock, 0);
+            document.getElementById('inv-low-items').innerText = products.filter(p => p.stock <= 10).length;
+
+            tbody.innerHTML = filtered.map(p => `
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b dark:border-gray-700">
+                    <td class="p-3.5 font-bold text-gray-700 dark:text-gray-300">${p.code}</td>
+                    <td class="p-3.5 font-bold text-gray-800 dark:text-white">${p.name}</td>
+                    <td class="p-3.5 text-gray-500">${p.category}</td>
+                    <td class="p-3.5 font-bold ${p.stock <= 10 ? 'text-rose-600' : 'text-emerald-600'}">${p.stock} قطعة</td>
+                    <td class="p-3.5 font-semibold text-gray-800 dark:text-gray-200">${p.price.toFixed(2)} ج.م</td>
+                    <td class="p-3.5">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold ${p.stock <= 10 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">
+                            ${p.stock <= 10 ? 'مخزون منخفض' : 'متوفر بالمخزن'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Products Tab Render & Modals
+        function renderProductsTable() {
+            const query = document.getElementById('prod-search').value.trim().toLowerCase();
+            const tbody = document.getElementById('products-table-body');
+
+            const filtered = products.filter(p => 
+                p.name.toLowerCase().includes(query) ||
+                p.code.toLowerCase().includes(query) ||
+                (p.barcode && p.barcode.toLowerCase().includes(query)) ||
+                p.category.toLowerCase().includes(query)
+            );
+
+            tbody.innerHTML = filtered.map(p => `
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b dark:border-gray-700">
+                    <td class="p-3.5 font-bold text-gray-700 dark:text-gray-300">${p.code}</td>
+                    <td class="p-3.5 font-mono text-xs text-gray-500">${p.barcode || '-'}</td>
+                    <td class="p-3.5 font-bold text-gray-800 dark:text-white">${p.name}</td>
+                    <td class="p-3.5 text-gray-500">${p.category}</td>
+                    <td class="p-3.5 font-bold text-blue-600 dark:text-blue-400">${p.price.toFixed(2)} ج.م</td>
+                    <td class="p-3.5 font-semibold text-gray-600 dark:text-gray-400">${p.cost.toFixed(2)} ج.م</td>
+                    <td class="p-3.5 font-bold ${p.stock <= 10 ? 'text-rose-600' : 'text-gray-800 dark:text-white'}">${p.stock}</td>
+                    <td class="p-3.5 text-center">
+                        <div class="flex justify-center gap-2">
+                            <button onclick="openProductModal(${p.id})" class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="openDeleteProductModal(${p.id})" class="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-gray-700 rounded-lg"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openProductModal(prodId = null) {
+            const modal = document.getElementById('product-modal');
+            const title = document.getElementById('modal-title');
+
+            if (prodId) {
+                const prod = products.find(p => p.id === prodId);
+                title.innerText = 'تعديل بيانات الصنف';
+                document.getElementById('prod-id').value = prod.id;
+                document.getElementById('modal-code').value = prod.code;
+                document.getElementById('modal-barcode').value = prod.barcode || '';
+                document.getElementById('modal-name').value = prod.name;
+                document.getElementById('modal-category').value = prod.category;
+                document.getElementById('modal-price').value = prod.price;
+                document.getElementById('modal-cost').value = prod.cost;
+                document.getElementById('modal-stock').value = prod.stock;
+            } else {
+                title.innerText = 'إضافة صنف جديد';
+                document.getElementById('product-form').reset();
+                document.getElementById('prod-id').value = '';
+                document.getElementById('modal-code').value = (1000 + products.length + 1).toString();
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.add('hidden');
+        }
+
+        function saveProduct(e) {
+            e.preventDefault();
+            const id = document.getElementById('prod-id').value;
+            const code = document.getElementById('modal-code').value.trim();
+            const barcode = document.getElementById('modal-barcode').value.trim();
+            const name = document.getElementById('modal-name').value.trim();
+            const category = document.getElementById('modal-category').value.trim();
+            const price = parseFloat(document.getElementById('modal-price').value) || 0;
+            const cost = parseFloat(document.getElementById('modal-cost').value) || 0;
+            const stock = parseInt(document.getElementById('modal-stock').value) || 0;
+
+            if (id) {
+                const index = products.findIndex(p => p.id == id);
+                if (index !== -1) {
+                    products[index] = { ...products[index], code, barcode, name, category, price, cost, stock };
+                    showToast('تم تعديل الصنف بنجاح', 'success');
+                }
+            } else {
+                const newProd = {
+                    id: Date.now(),
+                    code, barcode, name, category, price, cost, stock
+                };
+                products.push(newProd);
+                showToast('تمت إضافة الصنف الجديد بنجاح', 'success');
+            }
+
+            saveProductsToStorage();
+            closeProductModal();
+            renderProductsTable();
+            renderInventoryTable();
+            renderPosSearchResults();
+        }
+
+        function openDeleteProductModal(prodId) {
+            selectedProductToDelete = prodId;
+            const prod = products.find(p => p.id === prodId);
+            if (prod) {
+                document.getElementById('delete-prod-name').innerText = prod.name;
+                document.getElementById('delete-product-modal').classList.remove('hidden');
+
+                document.getElementById('confirm-delete-prod-btn').onclick = function() {
+                    products = products.filter(p => p.id !== selectedProductToDelete);
+                    saveProductsToStorage();
+                    closeDeleteProductModal();
+                    renderProductsTable();
+                    renderInventoryTable();
+                    renderPosSearchResults();
+                    showToast('تم حذف الصنف بنجاح', 'success');
+                };
+            }
+        }
+
+        function closeDeleteProductModal() {
+            document.getElementById('delete-product-modal').classList.add('hidden');
+            selectedProductToDelete = null;
+        }
+
+        // Invoices Tab Logic
+        function renderInvoicesList() {
+            const query = document.getElementById('invoices-search').value.trim().toLowerCase();
+            const container = document.getElementById('invoices-list-container');
+
+            const filtered = invoices.filter(inv => 
+                inv.id.toString().includes(query) ||
+                (inv.buyerName && inv.buyerName.toLowerCase().includes(query)) ||
+                (inv.sellerName && inv.sellerName.toLowerCase().includes(query))
+            );
+
+            const totalSales = invoices.reduce((sum, i) => sum + i.finalTotal, 0);
+            const totalProfit = invoices.reduce((sum, i) => sum + i.profit, 0);
+            const totalDiscount = invoices.reduce((sum, i) => sum + (i.discount || 0), 0);
+
+            document.getElementById('inv-sum-count').innerText = invoices.length;
+            document.getElementById('inv-sum-sales').innerText = totalSales.toFixed(2) + ' ج.م';
+            document.getElementById('inv-sum-profit').innerText = totalProfit.toFixed(2) + ' ج.م';
+            document.getElementById('inv-sum-discount').innerText = totalDiscount.toFixed(2) + ' ج.م';
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">لا توجد فواتير مسجلة حالياً</p>';
+                return;
+            }
+
+            container.innerHTML = filtered.slice().reverse().map(inv => {
+                const dateFormatted = new Date(inv.date).toLocaleString('ar-EG');
+                return `
+                    <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-blue-600 dark:text-blue-400 text-base">فاتورة #${inv.id}</span>
+                                <span class="text-xs bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-semibold px-2 py-0.5 rounded-full">${inv.paymentMethod}</span>
+                                <span class="text-xs text-gray-400">${dateFormatted}</span>
+                            </div>
+                            <p class="text-xs font-semibold text-gray-600 dark:text-gray-300 mt-1">
+                                العميل: <span class="text-gray-800 dark:text-white">${inv.buyerName}</span> | البائع: <span class="text-gray-800 dark:text-white">${inv.sellerName}</span>
+                            </p>
+                            <p class="text-xs text-gray-400 mt-1">الأصناف: ${inv.items ? inv.items.map(i => i.name + ' (' + i.quantity + ')').join('، ') : '-'}</p>
+                        </div>
+                        <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t md:border-0 dark:border-gray-700 pt-3 md:pt-0">
+                            <div class="text-left">
+                                <p class="text-lg font-black text-gray-800 dark:text-white">${inv.finalTotal.toFixed(2)} ج.م</p>
+                                <p class="text-xs font-bold text-emerald-600 dark:text-emerald-400">الربح: ${inv.profit.toFixed(2)} ج.م</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="openPrintModalById('${inv.id}')" title="معاينة وطباعة" class="p-2 bg-blue-50 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-gray-600 text-blue-600 dark:text-blue-300 rounded-lg text-sm"><i class="fa-solid fa-print"></i></button>
+                                <button onclick="openEditInvoiceModal('${inv.id}')" title="تعديل الفاتورة" class="p-2 bg-amber-50 dark:bg-gray-700 hover:bg-amber-100 dark:hover:bg-gray-600 text-amber-600 dark:text-amber-300 rounded-lg text-sm"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button onclick="openDeleteModal('${inv.id}')" title="حذف الفاتورة" class="p-2 bg-rose-50 dark:bg-gray-700 hover:bg-rose-100 dark:hover:bg-gray-600 text-rose-600 dark:text-rose-300 rounded-lg text-sm"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                        </div>
                     </div>
                 `;
-            });
-            document.getElementById('cart-total').innerText = total.toFixed(2) + ' ج.م';
+            }).join('');
         }
 
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            renderCart();
+        function openEditInvoiceModal(invId) {
+            const inv = invoices.find(i => i.id === invId);
+            if (!inv) return;
+
+            document.getElementById('edit-inv-id').value = inv.id;
+            document.getElementById('edit-inv-id-display').innerText = '#' + inv.id;
+            document.getElementById('edit-inv-buyer').value = inv.buyerName || '';
+            document.getElementById('edit-inv-seller').value = inv.sellerName || '';
+            document.getElementById('edit-inv-payment').value = inv.paymentMethod || 'نقداً (كاش)';
+
+            document.getElementById('edit-invoice-modal').classList.remove('hidden');
         }
 
-        function checkout() {
-            if (cart.length === 0) return alert('السلة فارغة!');
-            cart.forEach(cItem => {
-                const p = products.find(prod => prod.id === cItem.id);
-                if (p) p.stock -= cItem.qty;
-            });
-            saveProducts();
-            cart = [];
-            renderCart();
-            renderPOSProducts();
-            alert('تم إتمام الدفع واستخراج الفاتورة بنجاح!');
+        function closeEditInvoiceModal() {
+            document.getElementById('edit-invoice-modal').classList.add('hidden');
         }
 
-        function renderInventory() {
-            const tbody = document.getElementById('inventory-table-body');
-            tbody.innerHTML = '';
-            products.forEach(p => {
-                tbody.innerHTML += `
-                    <tr class="border-b dark:border-slate-800 hover:bg-gray-50 dark:hover:bg-slate-800">
-                        <td class="p-3 font-semibold text-slate-800 dark:text-white">${p.name}</td>
-                        <td class="p-3 text-gray-600 dark:text-gray-300">${p.barcode}</td>
-                        <td class="p-3 text-slate-800 dark:text-white">${p.price} ج.م</td>
-                        <td class="p-3"><span class="px-2 py-0.5 rounded text-xs ${p.stock <= 5 ? 'bg-red-100 text-red-600 font-bold' : 'bg-green-100 dark:bg-green-950 text-green-600 dark:text-green-300'}">${p.stock}</span></td>
-                        <td class="p-3">
-                            <button onclick="deleteProduct(${p.id})" class="text-red-600 hover:text-red-800 text-xs"><i class="fa-solid fa-trash"></i> حذف</button>
-                        </td>
-                    </tr>
-                `;
-            });
+        function saveInvoiceEdits(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-inv-id').value;
+            const buyer = document.getElementById('edit-inv-buyer').value.trim();
+            const seller = document.getElementById('edit-inv-seller').value.trim();
+            const payment = document.getElementById('edit-inv-payment').value;
+
+            const inv = invoices.find(i => i.id === id);
+            if (inv) {
+                inv.buyerName = buyer;
+                inv.sellerName = seller;
+                inv.paymentMethod = payment;
+
+                saveInvoicesToStorage();
+                closeEditInvoiceModal();
+                renderInvoicesList();
+                renderDashboard();
+                showToast(`تم تعديل بيانات الفاتورة #${id} بنجاح!`, 'success');
+            }
         }
 
-        function addProductModal() {
-            const name = prompt('أدخل اسم المنتج الجديد:');
-            if (!name) return;
-            const barcode = prompt('أدخل رقم الباركود:');
-            if (!barcode) return;
-            const price = parseFloat(prompt('أدخل سعر البيع:'));
-            const stock = parseInt(prompt('أدخل الكمية في المخزون:'));
+        function openDeleteModal(invId) {
+            selectedInvoiceToDelete = invId;
+            document.getElementById('delete-inv-id').innerText = '#' + invId;
+            document.getElementById('delete-modal').classList.remove('hidden');
 
-            if (isNaN(price) || isNaN(stock)) {
-                alert('الرجاء إدخال أرقام صحيحة.');
+            document.getElementById('confirm-delete-btn').onclick = function () {
+                const inv = invoices.find(i => i.id === selectedInvoiceToDelete);
+                if (inv && inv.items) {
+                    inv.items.forEach(item => {
+                        const prod = products.find(p => p.id === item.id);
+                        if (prod) prod.stock += item.quantity;
+                    });
+                    saveProductsToStorage();
+                }
+
+                invoices = invoices.filter(i => i.id !== selectedInvoiceToDelete);
+                saveInvoicesToStorage();
+
+                closeDeleteModal();
+                renderInvoicesList();
+                renderDashboard();
+                renderPosSearchResults();
+                renderInventoryTable();
+                showToast('تم حذف الفاتورة واستعادة الأصناف إلى المخزن بنجاح', 'success');
+            };
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.add('hidden');
+            selectedInvoiceToDelete = null;
+        }
+
+        function openPrintModalById(invId) {
+            const inv = invoices.find(i => i.id === invId);
+            if (inv) openPrintModal(inv);
+        }
+
+        function openPrintModal(inv) {
+            const container = document.getElementById('printable-invoice');
+            const dateFormatted = new Date(inv.date).toLocaleString('ar-EG');
+
+            container.innerHTML = `
+                <div class="text-center border-b dark:border-gray-700 pb-3 mb-2">
+                    <h3 class="font-black text-base text-gray-900 dark:text-white">Nour Group ERP — نور جروب</h3>
+                    <p class="text-gray-500 text-xs">فاتورة بيع رقم: #${inv.id}</p>
+                    <p class="text-gray-400 text-xs">${dateFormatted}</p>
+                </div>
+                <div class="space-y-1 text-xs border-b dark:border-gray-700 pb-2 mb-2">
+                    <p><span class="font-bold">المشتري:</span> ${inv.buyerName}</p>
+                    <p><span class="font-bold">البائع / الكاشير:</span> ${inv.sellerName}</p>
+                    <p><span class="font-bold">طريقة الدفع:</span> ${inv.paymentMethod}</p>
+                </div>
+                <table class="w-full text-right text-xs mb-3">
+                    <thead class="border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                        <tr>
+                            <th class="py-1">الصنف</th>
+                            <th class="py-1">الكمية</th>
+                            <th class="py-1">السعر</th>
+                            <th class="py-1">الإجمالي</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
+                        ${inv.items.map(item => `
+                            <tr>
+                                <td class="py-1 font-semibold">${item.name}</td>
+                                <td class="py-1">${item.quantity}</td>
+                                <td class="py-1">${item.price.toFixed(2)}</td>
+                                <td class="py-1 font-bold">${(item.price * item.quantity).toFixed(2)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <div class="border-t dark:border-gray-700 pt-2 space-y-1 text-xs font-bold">
+                    <div class="flex justify-between">
+                        <span>الإجمالي:</span>
+                        <span>${inv.subtotal.toFixed(2)} ج.م</span>
+                    </div>
+                    ${inv.discount > 0 ? `
+                        <div class="flex justify-between text-amber-600">
+                            <span>الخصم:</span>
+                            <span>-${inv.discount.toFixed(2)} ج.م</span>
+                        </div>
+                    ` : ''}
+                    <div class="flex justify-between text-blue-600 dark:text-blue-400 text-sm border-t dark:border-gray-700 pt-1">
+                        <span>الصافي المطلوب:</span>
+                        <span>${inv.finalTotal.toFixed(2)} ج.م</span>
+                    </div>
+                </div>
+                <div class="text-center text-gray-400 text-xs mt-4 pt-2 border-t dark:border-gray-700">
+                    شكراً لتسوقكم من نور جروب!
+                </div>
+            `;
+
+            document.getElementById('print-modal').classList.remove('hidden');
+        }
+
+        function closePrintModal() {
+            document.getElementById('print-modal').classList.add('hidden');
+        }
+
+        // ==========================================
+        // وظائف تبويب "الطلبات" المضافة حديثاً
+        // ==========================================
+        function renderOrdersList() {
+            const container = document.getElementById('orders-list-container');
+            document.getElementById('orders-count-label').innerText = orders.length + ' طلبات';
+
+            if (orders.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-sm text-center py-12">لا توجد طلبات معلقة حالياً</p>';
                 return;
             }
 
-            products.push({ id: Date.now(), name, barcode, price, stock });
-            saveProducts();
-            renderInventory();
-            renderPOSProducts();
-            alert('تم إضافة المنتج بنجاح!');
+            container.innerHTML = orders.map(ord => {
+                const dateFormatted = new Date(ord.date).toLocaleString('ar-EG');
+                return `
+                    <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-purple-600 dark:text-purple-400 text-base">طلب إلكتروني #${ord.id}</span>
+                                <span class="text-xs bg-purple-50 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 font-semibold px-2 py-0.5 rounded-full">قيد المراجعة</span>
+                                <span class="text-xs text-gray-400">${dateFormatted}</span>
+                            </div>
+                            <p class="text-xs font-semibold text-gray-600 dark:text-gray-300 mt-1">
+                                العميل: <span class="text-gray-800 dark:text-white">${ord.buyerName}</span> | طريقة الدفع: <span class="text-gray-800 dark:text-white">${ord.paymentMethod}</span>
+                            </p>
+                            <p class="text-xs text-gray-400 mt-1">الأصناف المطلوبة: ${ord.items.map(i => i.name + ' (' + i.quantity + ')').join('، ')}</p>
+                        </div>
+                        <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t md:border-0 dark:border-gray-700 pt-3 md:pt-0">
+                            <div class="text-left">
+                                <p class="text-lg font-black text-gray-800 dark:text-white">${ord.finalTotal.toFixed(2)} ج.م</p>
+                                <p class="text-xs font-bold text-emerald-600 dark:text-emerald-400">الربح المتوقع: ${ord.profit.toFixed(2)} ج.م</p>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="approveOrder('${ord.id}')" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow">
+                                    <i class="fa-solid fa-check"></i> موافقة
+                                </button>
+                                <button onclick="rejectOrder('${ord.id}')" class="px-3 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow">
+                                    <i class="fa-solid fa-xmark"></i> رفض
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
-        function deleteProduct(id) {
-            if (confirm('هل أنت متأكد من حذف هذا المنتج؟')) {
-                products = products.filter(p => p.id !== id);
-                saveProducts();
-                renderInventory();
-                renderPOSProducts();
+        // زر محاكاة لاستقبال طلب من برنامج الموقع الخارجي للتجربة الفورية
+        function simulateIncomingOrder() {
+            const randomId = Date.now().toString().slice(-5);
+            const sampleOrder = {
+                id: randomId,
+                date: new Date().toISOString(),
+                buyerName: "عميل موقع (تجريبي)",
+                sellerName: "متجر الموقع الإلكتروني",
+                paymentMethod: "دفع إلكتروني",
+                items: [
+                    { id: 1001, name: "شاي العروسة ناعم - 40 جم", category: "شاي ناعم", price: 12, cost: 9.6, quantity: 1 }
+                ],
+                subtotal: 12,
+                discount: 0,
+                finalTotal: 12,
+                profit: 2.4
+            };
+
+            orders.push(sampleOrder);
+            saveOrdersToStorage();
+            renderOrdersList();
+            showToast(`تم استلام طلب جديد برقم #${randomId} من الموقع الإلكتروني!`, 'info');
+        }
+
+        // الموافقة على الطلب وتحويله لفاتورة مبيعات وخصمه من المخزون
+        function approveOrder(orderId) {
+            const index = orders.findIndex(o => o.id === orderId);
+            if (index === -1) return;
+
+            const order = orders[index];
+
+            // التحقق من توافر المخزون قبل الموافقة
+            for (let item of order.items) {
+                const prod = products.find(p => p.id === item.id);
+                if (!prod || prod.stock < item.quantity) {
+                    showToast(`فشل القبول: الصنف (${item.name}) غير متوفر بالكمية المطلوبة في المخزن!`, 'error');
+                    return;
+                }
             }
-        }
 
-        // إضافات الكاميرا والماسح الضوئي
-        function openScanner() {
-            document.getElementById('scanner-container').classList.remove('hidden');
-            html5QrCode = new Html5Qrcode("reader");
-            const config = { fps: 10, qrbox: { width: 250, height: 150 } };
-            
-            html5QrCode.start(
-                { facingMode: "environment" }, 
-                config, 
-                (decodedText) => {
-                    findProductByBarcode(decodedText);
-                    closeScanner();
-                },
-                (errorMessage) => {}
-            ).catch(err => {
-                alert('تعذر فتح الكاميرا، يرجى التأكد من إعطاء صلاحيات الكاميرا للمتصفح.');
-                closeScanner();
+            // خصم الكميات من المخزون
+            order.items.forEach(item => {
+                const prod = products.find(p => p.id === item.id);
+                if (prod) prod.stock -= item.quantity;
             });
+            saveProductsToStorage();
+
+            // تحويل الطلب إلى فاتورة مبيعات معتمدة
+            const newInvoice = {
+                id: order.id,
+                date: order.date,
+                buyerName: order.buyerName,
+                sellerName: order.sellerName,
+                paymentMethod: order.paymentMethod,
+                items: order.items,
+                subtotal: order.subtotal,
+                discount: order.discount,
+                finalTotal: order.finalTotal,
+                profit: order.profit
+            };
+
+            invoices.push(newInvoice);
+            saveInvoicesToStorage();
+
+            // إزالة الطلب من قائمة الطلبات المعلقة
+            orders.splice(index, 1);
+            saveOrdersToStorage();
+
+            // تحديث الواجهات
+            renderOrdersList();
+            renderInvoicesList();
+            renderDashboard();
+            renderInventoryTable();
+            renderPosSearchResults();
+
+            showToast(`تمت الموافقة على الطلب #${orderId} وتحويله إلى فاتورة بيع وخصمه من المخزون بنجاح!`, 'success');
         }
 
-        function closeScanner() {
-            if (html5QrCode) {
-                html5QrCode.stop().then(() => {
-                    document.getElementById('scanner-container').classList.add('hidden');
-                }).catch(() => {
-                    document.getElementById('scanner-container').classList.add('hidden');
-                });
-            } else {
-                document.getElementById('scanner-container').classList.add('hidden');
-            }
+        // رفض الطلب وحذفه من الطلبات المعلقة
+        function rejectOrder(orderId) {
+            orders = orders.filter(o => o.id !== orderId);
+            saveOrdersToStorage();
+            renderOrdersList();
+            showToast(`تم رفض وحذف الطلب #${orderId}`, 'error');
         }
-
-        function findProductByBarcode(code) {
-            const product = products.find(p => p.barcode === code || p.id == code);
-            if (product) {
-                addToCart(product.id);
-            } else {
-                alert('الباركود أو الكود (' + code + ') غير مسجل في النظام!');
-            }
-        }
-
-        renderPOSProducts();
     </script>
 </body>
 </html>
