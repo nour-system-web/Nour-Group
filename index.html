@@ -26,16 +26,16 @@
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden text-gray-800 dark:text-gray-100 bg-[#f4f6f9] dark:bg-gray-900 transition-colors duration-200">
+<body class="flex flex-col lg:flex-row h-screen overflow-hidden text-gray-800 dark:text-gray-100 bg-[#f4f6f9] dark:bg-gray-900 transition-colors duration-200">
 
     <!-- شاشة تسجيل الدخول -->
     <div id="login-overlay" class="fixed inset-0 bg-[#0b1329] z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-8 shadow-2xl text-center space-y-6 border border-gray-700">
-            <div class="w-24 h-24 bg-white rounded-2xl p-2 shadow-md mx-auto flex items-center justify-center border border-gray-200">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl text-center space-y-6 border border-gray-700">
+            <div class="w-28 h-28 sm:w-36 sm:h-36 bg-white rounded-2xl p-3 shadow-md mx-auto flex items-center justify-center border border-gray-200">
                 <img src="logo.png" alt="Nour Group Logo" class="max-h-full max-w-full object-contain">
             </div>
             <div>
-                <h2 class="text-xl font-extrabold text-gray-800 dark:text-white">تسجيل الدخول إلى موقع المبيعات</h2>
+                <h2 class="text-lg sm:text-xl font-extrabold text-gray-800 dark:text-white">تسجيل الدخول إلى موقع المبيعات</h2>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">يرجى إدخال كلمة المرور للمتابعة إلى النظام</p>
             </div>
             <form onsubmit="handleLogin(event)" class="space-y-4 text-right">
@@ -60,38 +60,44 @@
 
     <div id="toast-container" class="fixed top-5 left-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-    <aside class="w-64 bg-[#0b1329] dark:bg-gray-950 flex flex-col justify-between shrink-0 shadow-xl z-20 transition-colors duration-200">
+    <!-- خلفية شفافة للقائمة الجانبية على الموبايل -->
+    <div id="sidebar-backdrop" onclick="toggleMobileSidebar()" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden"></div>
+
+    <aside id="app-sidebar" class="w-64 bg-[#0b1329] dark:bg-gray-950 flex flex-col justify-between shrink-0 shadow-xl z-40 fixed lg:static inset-y-0 right-0 transform translate-x-full lg:translate-x-0 transition-transform duration-300">
         <div>
-            <div class="p-5 border-b border-gray-800 text-center flex flex-col items-center">
-                <div class="w-20 h-20 bg-white rounded-2xl p-2 shadow-lg mb-3 flex items-center justify-center border border-gray-700">
+            <div class="p-4 sm:p-5 border-b border-gray-800 text-center flex flex-col items-center relative">
+                <button onclick="toggleMobileSidebar()" class="lg:hidden absolute left-4 top-4 text-gray-400 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-2xl p-2 shadow-lg mb-3 flex items-center justify-center border border-gray-700">
                     <img src="logo.png" alt="Nour Group Logo" class="max-h-full max-w-full object-contain">
                 </div>
-                <h1 class="text-xl font-bold text-white tracking-wide">Nour Group ERP</h1>
+                <h1 class="text-lg sm:text-xl font-bold text-white tracking-wide">Nour Group ERP</h1>
                 <p class="text-xs text-blue-400 font-medium mt-1">نور جروب — نظام المبيعات والمخزون</p>
             </div>
 
-            <nav class="mt-4 space-y-1">
-                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="sidebar-item active w-full flex items-center px-6 py-3.5 text-sm font-semibold">
+            <nav class="mt-2 sm:mt-4 space-y-1 overflow-y-auto max-h-[calc(100vh-220px)]">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="sidebar-item active w-full flex items-center px-6 py-3 text-sm font-semibold">
                     <i class="fa-solid fa-chart-pie w-6 text-lg"></i>
                     <span>لوحة التحكم</span>
                 </button>
-                <button onclick="switchTab('pos')" id="nav-pos" class="sidebar-item w-full flex items-center px-6 py-3.5 text-sm font-semibold">
+                <button onclick="switchTab('pos')" id="nav-pos" class="sidebar-item w-full flex items-center px-6 py-3 text-sm font-semibold">
                     <i class="fa-solid fa-cart-shopping w-6 text-lg"></i>
                     <span>نقطة البيع</span>
                 </button>
-                <button onclick="switchTab('inventory')" id="nav-inventory" class="sidebar-item w-full flex items-center px-6 py-3.5 text-sm font-semibold">
+                <button onclick="switchTab('inventory')" id="nav-inventory" class="sidebar-item w-full flex items-center px-6 py-3 text-sm font-semibold">
                     <i class="fa-solid fa-boxes-stacked w-6 text-lg"></i>
                     <span>المخزون</span>
                 </button>
-                <button onclick="switchTab('products')" id="nav-products" class="sidebar-item w-full flex items-center px-6 py-3.5 text-sm font-semibold">
+                <button onclick="switchTab('products')" id="nav-products" class="sidebar-item w-full flex items-center px-6 py-3 text-sm font-semibold">
                     <i class="fa-solid fa-list-check w-6 text-lg"></i>
                     <span>الأصناف</span>
                 </button>
-                <button onclick="switchTab('invoices')" id="nav-invoices" class="sidebar-item w-full flex items-center px-6 py-3.5 text-sm font-semibold">
+                <button onclick="switchTab('invoices')" id="nav-invoices" class="sidebar-item w-full flex items-center px-6 py-3 text-sm font-semibold">
                     <i class="fa-solid fa-file-invoice-dollar w-6 text-lg"></i>
                     <span>الفواتير والأرباح</span>
                 </button>
-                <button onclick="switchTab('orders')" id="nav-orders" class="sidebar-item w-full flex items-center justify-between px-6 py-3.5 text-sm font-semibold">
+                <button onclick="switchTab('orders')" id="nav-orders" class="sidebar-item w-full flex items-center justify-between px-6 py-3 text-sm font-semibold">
                     <div class="flex items-center gap-3">
                         <i class="fa-solid fa-clipboard-list w-6 text-lg"></i>
                         <span>الطلبات</span>
@@ -107,63 +113,67 @@
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col overflow-y-auto bg-[#f8fafc] dark:bg-gray-900 transition-colors duration-200">
+    <main class="flex-1 flex flex-col h-full overflow-y-auto bg-[#f8fafc] dark:bg-gray-900 transition-colors duration-200">
         
-        <!-- شريط علوي لإضافة زر الوضع الداكن/الفاتح وتسهيل الخروج -->
-        <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-3 flex justify-between items-center transition-colors duration-200">
-            <div class="text-sm font-bold text-gray-700 dark:text-gray-200">مرحباً بك، أستاذ نور</div>
+        <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-3 flex justify-between items-center transition-colors duration-200 shrink-0 sticky top-0 z-20">
             <div class="flex items-center gap-3">
-                <button onclick="toggleDarkMode()" class="p-2 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-yellow-400 hover:bg-gray-200 dark:hover:bg-gray-600 transition flex items-center gap-2 text-xs font-bold shadow-sm">
+                <button onclick="toggleMobileSidebar()" class="lg:hidden p-2 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200">
+                    <i class="fa-solid fa-bars text-base"></i>
+                </button>
+                <div class="text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200">مرحباً بك، أستاذ نور</div>
+            </div>
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button onclick="toggleDarkMode()" class="p-2 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-yellow-400 hover:bg-gray-200 transition flex items-center gap-2 text-xs font-bold shadow-sm">
                     <i id="theme-icon" class="fa-solid fa-moon text-base"></i>
-                    <span id="theme-text">الوضع الداكن</span>
+                    <span class="hidden sm:inline" id="theme-text">الوضع الداكن</span>
                 </button>
                 <button onclick="logout()" class="p-2 rounded-xl bg-rose-50 dark:bg-rose-900/30 text-rose-600 hover:bg-rose-100 transition flex items-center gap-1 text-xs font-bold shadow-sm">
                     <i class="fa-solid fa-right-from-bracket"></i>
-                    <span>قفل النظام</span>
+                    <span class="hidden sm:inline">قفل النظام</span>
                 </button>
             </div>
         </header>
 
-        <section id="tab-dashboard" class="p-6 space-y-6">
-            <div class="flex justify-between items-center">
+        <section id="tab-dashboard" class="p-4 sm:p-6 space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">لوحة التحكم</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">نظرة عامة على العمليات الماليّة والمبيعات</p>
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">لوحة التحكم</h2>
+                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">نظرة عامة على العمليات الماليّة والمبيعات</p>
                 </div>
-                <div id="current-date" class="bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg shadow-sm text-sm font-semibold text-gray-600 border border-gray-200"></div>
+                <div id="current-date" class="bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg shadow-sm text-xs sm:text-sm font-semibold text-gray-600 border border-gray-200"></div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-                <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex justify-between items-center">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                <div class="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex justify-between items-center">
                     <div>
                         <p class="text-xs font-semibold text-gray-400">إجمالي المبيعات</p>
-                        <h3 id="dash-sales" class="text-2xl font-bold text-gray-800 dark:text-white mt-1">0.00 ج.م</h3>
+                        <h3 id="dash-sales" class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mt-1">0.00 ج.م</h3>
                         <p id="dash-invoices-count" class="text-xs text-gray-400 mt-1">0 فاتورة</p>
                     </div>
                     <div class="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/40 text-blue-600 flex items-center justify-center text-xl"><i class="fa-solid fa-dollar-sign"></i></div>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                <div class="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex justify-between items-center">
                     <div>
                         <p class="text-xs font-semibold text-gray-400">إجمالي الأرباح</p>
-                        <h3 id="dash-profits" class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">0.00 ج.م</h3>
+                        <h3 id="dash-profits" class="text-xl sm:text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">0.00 ج.م</h3>
                     </div>
                     <div class="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 flex items-center justify-center text-xl"><i class="fa-solid fa-chart-line"></i></div>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                <div class="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex justify-between items-center">
                     <div>
                         <p class="text-xs font-semibold text-gray-400">إجمالي الوحدات في المخزن</p>
-                        <h3 id="dash-units" class="text-2xl font-bold text-gray-800 dark:text-white mt-1">0</h3>
+                        <h3 id="dash-units" class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mt-1">0</h3>
                         <p class="text-xs text-gray-400 mt-1">وحدة مسجلة</p>
                     </div>
                     <div class="w-12 h-12 rounded-full bg-amber-50 dark:bg-amber-900/40 text-amber-600 flex items-center justify-center text-xl"><i class="fa-solid fa-box"></i></div>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                <div class="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex justify-between items-center">
                     <div>
                         <p class="text-xs font-semibold text-gray-400">عدد الأصناف</p>
-                        <h3 id="dash-items-count" class="text-2xl font-bold text-gray-800 dark:text-white mt-1">0</h3>
+                        <h3 id="dash-items-count" class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white mt-1">0</h3>
                         <p id="dash-low-stock-count" class="text-xs text-rose-500 font-semibold mt-1">0 صنف منخفض</p>
                     </div>
                     <div class="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 flex items-center justify-center text-xl"><i class="fa-solid fa-tags"></i></div>
@@ -171,16 +181,16 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                    <h3 class="font-bold text-gray-700 dark:text-gray-200 mb-4">توزيع المبيعات حسب الفئة</h3>
-                    <div class="h-64">
+                <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                    <h3 class="font-bold text-gray-700 dark:text-gray-200 mb-4 text-sm sm:text-base">توزيع المبيعات حسب الفئة</h3>
+                    <div class="h-60 sm:h-64">
                         <canvas id="categoryChart"></canvas>
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between">
+                <div class="bg-white dark:bg-gray-800 p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between">
                     <div>
-                        <h3 class="font-bold text-gray-700 dark:text-gray-200 mb-4">آخر الفواتير</h3>
+                        <h3 class="font-bold text-gray-700 dark:text-gray-200 mb-4 text-sm sm:text-base">آخر الفواتير</h3>
                         <div id="dash-recent-invoices" class="space-y-3">
                             <p class="text-gray-400 text-sm text-center py-6">لا توجد فواتير سابقة</p>
                         </div>
@@ -190,8 +200,8 @@
             </div>
         </section>
 
-        <section id="tab-pos" class="hidden h-full flex flex-col lg:flex-row overflow-hidden">
-            <div class="flex-1 p-6 flex flex-col overflow-y-auto">
+        <section id="tab-pos" class="hidden flex-1 flex flex-col lg:flex-row overflow-hidden">
+            <div class="flex-1 p-4 sm:p-6 flex flex-col overflow-y-auto">
                 <div class="mb-4">
                     <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-1">نقطة البيع (POS)</h2>
                     <p class="text-xs text-gray-500 dark:text-gray-400">أضف الأصناف بالفواتير بالبحث أو الكود أو الباركود</p>
@@ -201,13 +211,13 @@
                     </div>
                 </div>
 
-                <div id="pos-search-results" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                <div id="pos-search-results" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3"></div>
             </div>
 
-            <div class="w-full lg:w-96 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 p-5 flex flex-col justify-between shadow-lg shrink-0 overflow-y-auto transition-colors duration-200">
+            <div class="w-full lg:w-96 bg-white dark:bg-gray-800 border-t lg:border-t-0 lg:border-r border-gray-200 dark:border-gray-700 p-4 sm:p-5 flex flex-col justify-between shadow-lg shrink-0 max-h-[50vh] lg:max-h-full overflow-y-auto transition-colors duration-200">
                 <div>
                     <div class="flex justify-between items-center border-b dark:border-gray-700 pb-3 mb-3">
-                        <h3 class="font-bold text-gray-800 dark:text-white text-lg">تفاصيل الفاتورة والسلة</h3>
+                        <h3 class="font-bold text-gray-800 dark:text-white text-base sm:text-lg">تفاصيل الفاتورة والسلة</h3>
                         <button onclick="clearCart()" class="text-xs text-rose-500 hover:underline font-semibold">تفريغ السلة</button>
                     </div>
 
@@ -233,7 +243,7 @@
                         </div>
                     </div>
 
-                    <div class="max-h-56 overflow-y-auto mb-4 divide-y divide-gray-100 dark:divide-gray-700" id="cart-items-container">
+                    <div class="max-h-40 sm:max-h-56 overflow-y-auto mb-4 divide-y divide-gray-100 dark:divide-gray-700" id="cart-items-container">
                         <p class="text-gray-400 text-sm text-center py-10">الفاتورة فارغة — ابحث عن صنف أو انقر للإضافة</p>
                     </div>
                 </div>
@@ -262,11 +272,11 @@
                     <div class="border-t border-gray-200 dark:border-gray-700 pt-2 flex justify-between items-center">
                         <div>
                             <p class="text-xs text-gray-500">الإجمالي النهائي</p>
-                            <p class="text-2xl font-black text-blue-600 dark:text-blue-400" id="cart-final-total">0.00 ج.م</p>
+                            <p class="text-xl sm:text-2xl font-black text-blue-600 dark:text-blue-400" id="cart-final-total">0.00 ج.م</p>
                         </div>
                         <div class="text-left">
                             <p class="text-xs text-gray-400">صافي الربح المتوقع</p>
-                            <p class="text-sm font-bold text-emerald-600 dark:text-emerald-400" id="cart-expected-profit">0.00 ج.م</p>
+                            <p class="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400" id="cart-expected-profit">0.00 ج.م</p>
                         </div>
                     </div>
 
@@ -278,30 +288,30 @@
             </div>
         </section>
 
-        <section id="tab-inventory" class="hidden p-6 space-y-6">
+        <section id="tab-inventory" class="hidden p-4 sm:p-6 space-y-6">
             <div class="flex justify-between items-center">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">إدارة المخزون</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">حالة مخزون المنتجات مع تحديث فوري وسلس</p>
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">إدارة المخزون</h2>
+                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">حالة مخزون المنتجات مع تحديث فوري وسلس</p>
                 </div>
             </div>
 
-            <div class="flex flex-wrap gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
-                <div class="flex items-center gap-3 pr-4 border-l border-gray-200 dark:border-gray-700">
-                    <div class="text-xl text-blue-600 dark:text-blue-400 font-black" id="inv-total-items">0</div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <div class="flex items-center gap-3 p-2 sm:border-l sm:border-gray-200 dark:border-gray-700">
+                    <div class="text-lg sm:text-xl text-blue-600 dark:text-blue-400 font-black" id="inv-total-items">0</div>
                     <span class="text-xs text-gray-500 dark:text-gray-400">إجمالي الأصناف</span>
                 </div>
-                <div class="flex items-center gap-3 pr-4 border-l border-gray-200 dark:border-gray-700">
-                    <div class="text-xl text-emerald-600 dark:text-emerald-400 font-black" id="inv-total-quantity">0</div>
+                <div class="flex items-center gap-3 p-2 sm:border-l sm:border-gray-200 dark:border-gray-700">
+                    <div class="text-lg sm:text-xl text-emerald-600 dark:text-emerald-400 font-black" id="inv-total-quantity">0</div>
                     <span class="text-xs text-gray-500 dark:text-gray-400">إجمالي الوحدات بالمخزن</span>
                 </div>
-                <div class="flex items-center gap-3">
-                    <div class="text-xl text-rose-600 dark:text-rose-400 font-black" id="inv-low-items">0</div>
+                <div class="flex items-center gap-3 p-2">
+                    <div class="text-lg sm:text-xl text-rose-600 dark:text-rose-400 font-black" id="inv-low-items">0</div>
                     <span class="text-xs text-gray-500 dark:text-gray-400">أصناف منخفضة (أقل من 10)</span>
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex gap-4">
+            <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row gap-3">
                 <input type="text" id="inv-search" oninput="renderInventoryTable()" placeholder="بحث بالاسم أو الكود..." class="flex-1 p-2.5 border dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-900 dark:text-white">
                 <select id="inv-filter" onchange="renderInventoryTable()" class="p-2.5 border dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-900 dark:text-white">
                     <option value="all">جميع الأصناف</option>
@@ -310,7 +320,7 @@
             </div>
 
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-x-auto">
-                <table class="w-full text-right text-sm">
+                <table class="w-full text-right text-sm min-w-[600px]">
                     <thead class="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300 font-semibold border-b dark:border-gray-700">
                         <tr>
                             <th class="p-3.5">الكود</th>
@@ -326,11 +336,11 @@
             </div>
         </section>
 
-        <section id="tab-products" class="hidden p-6 space-y-6">
-            <div class="flex justify-between items-center">
+        <section id="tab-products" class="hidden p-4 sm:p-6 space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">دليل الأصناف والأسعار</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">تعديل الأسعار والمخزون، إضافة أو حذف أصناف</p>
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">دليل الأصناف والأسعار</h2>
+                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">تعديل الأسعار والمخزون، إضافة أو حذف أصناف</p>
                 </div>
                 <button onclick="openProductModal()" class="bg-purple-700 hover:bg-purple-800 text-white font-semibold px-4 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow">
                     <i class="fa-solid fa-plus"></i>
@@ -343,7 +353,7 @@
             </div>
 
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-x-auto">
-                <table class="w-full text-right text-sm">
+                <table class="w-full text-right text-sm min-w-[700px]">
                     <thead class="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300 font-semibold border-b dark:border-gray-700">
                         <tr>
                             <th class="p-3.5">الكود</th>
@@ -361,30 +371,30 @@
             </div>
         </section>
 
-        <section id="tab-invoices" class="hidden p-6 space-y-6">
+        <section id="tab-invoices" class="hidden p-4 sm:p-6 space-y-6">
             <div class="flex justify-between items-center">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">سجل الفواتير والمبيعات</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">إدارة الفواتير — تعديل السعر واسم المشتري، أو حذف الفواتير مع استرداد المخزون تلقائياً</p>
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">سجل الفواتير والمبيعات</h2>
+                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">إدارة الفواتير — تعديل السعر واسم المشتري، أو حذف الفواتير مع استرداد المخزون تلقائياً</p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                 <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
                     <p class="text-xs text-gray-400 font-semibold">إجمالي الفواتير</p>
-                    <h4 id="inv-sum-count" class="text-2xl font-black text-gray-800 dark:text-white mt-1">0</h4>
+                    <h4 id="inv-sum-count" class="text-xl sm:text-2xl font-black text-gray-800 dark:text-white mt-1">0</h4>
                 </div>
                 <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
                     <p class="text-xs text-gray-400 font-semibold">إجمالي المبيعات</p>
-                    <h4 id="inv-sum-sales" class="text-2xl font-black text-blue-600 dark:text-blue-400 mt-1">0.00 ج.م</h4>
+                    <h4 id="inv-sum-sales" class="text-xl sm:text-2xl font-black text-blue-600 dark:text-blue-400 mt-1">0.00 ج.م</h4>
                 </div>
                 <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
                     <p class="text-xs text-gray-400 font-semibold">صافي الأرباح</p>
-                    <h4 id="inv-sum-profit" class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">0.00 ج.م</h4>
+                    <h4 id="inv-sum-profit" class="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">0.00 ج.م</h4>
                 </div>
                 <div class="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm">
                     <p class="text-xs text-gray-400 font-semibold">إجمالي الخصومات</p>
-                    <h4 id="inv-sum-discount" class="text-2xl font-black text-amber-600 dark:text-amber-400 mt-1">0.00 ج.م</h4>
+                    <h4 id="inv-sum-discount" class="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400 mt-1">0.00 ج.م</h4>
                 </div>
             </div>
 
@@ -397,11 +407,11 @@
         </section>
 
         <!-- قسم الطلبات الجديد -->
-        <section id="tab-orders" class="hidden p-6 space-y-6">
-            <div class="flex justify-between items-center">
+        <section id="tab-orders" class="hidden p-4 sm:p-6 space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">إدارة الطلبات الواردة</h2>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">استعراض ومراجعة الطلبات الواردة من البرنامج الخارجي (الموقع الإلكتروني)</p>
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">إدارة الطلبات الواردة</h2>
+                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">استعراض ومراجعة الطلبات الواردة من البرنامج الخارجي (الموقع الإلكتروني)</p>
                 </div>
                 <button onclick="simulateIncomingOrder()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow">
                     <i class="fa-solid fa-plus-circle"></i>
@@ -424,7 +434,7 @@
 
     <!-- Modals -->
     <div id="product-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-gray-800 dark:text-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+        <div class="bg-white dark:bg-gray-800 dark:text-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b dark:border-gray-700 pb-3">
                 <h3 id="modal-title" class="font-bold text-gray-800 dark:text-white text-lg">تعديل الصنف</h3>
                 <button onclick="closeProductModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
@@ -447,7 +457,7 @@
                     <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">الفئة</label>
                     <input type="text" id="modal-category" required class="w-full p-2 border dark:border-gray-700 rounded text-sm mt-1 bg-white dark:bg-gray-900 dark:text-white">
                 </div>
-                <div class="grid grid-cols-3 gap-2">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <div>
                         <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">السعر (ج.م)</label>
                         <input type="number" step="0.01" id="modal-price" required class="w-full p-2 border dark:border-gray-700 rounded text-sm mt-1 bg-white dark:bg-gray-900 dark:text-white">
@@ -531,7 +541,7 @@
     </div>
 
     <div id="print-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl flex flex-col justify-between">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl flex flex-col justify-between max-h-[90vh] overflow-y-auto">
             <div id="printable-invoice" class="text-right text-xs text-gray-800 dark:text-gray-100 space-y-3 border dark:border-gray-700 p-4 rounded-xl bg-white dark:bg-gray-900"></div>
             <div class="flex gap-2 mt-4">
                 <button onclick="window.print()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2">
@@ -544,7 +554,13 @@
     </div>
 
     <script>
-        // نظام التحقق من كلمة المرور
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('app-sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            sidebar.classList.toggle('translate-x-full');
+            backdrop.classList.toggle('hidden');
+        }
+
         function handleLogin(e) {
             e.preventDefault();
             const passInput = document.getElementById('login-password').value;
@@ -567,7 +583,6 @@
             document.getElementById('login-error').classList.add('hidden');
         }
 
-        // تحقق عند تحميل الصفحة
         window.addEventListener('DOMContentLoaded', () => {
             const isLoggedIn = sessionStorage.getItem('nour_erp_logged_in');
             if (isLoggedIn === 'true') {
@@ -585,7 +600,6 @@
             renderOrdersList();
         });
 
-        // Default Products Data Imported directly from spreadsheet CSV
         const defaultProducts = [
             { id: 1001, code: "1001", barcode: "6222002300016", name: "شاي العروسة ناعم - 40 جم", category: "شاي ناعم", price: 12, cost: 9.6, stock: 2 },
             { id: 1002, code: "1002", barcode: "6222002300023", name: "شاي العروسة ناعم - 100 جم", category: "شاي ناعم", price: 28, cost: 22.4, stock: 88 },
@@ -647,7 +661,6 @@
             { id: 1065, code: "1065", barcode: "6222005050033", name: "هاربيك منظف ومطهر التواليت - 700 مل", category: "مذيب دهون", price: 60, cost: 48, stock: 699 }
         ];
 
-        // System State Variables
         let products = [];
         let cart = [];
         let invoices = [];
@@ -656,7 +669,6 @@
         let selectedInvoiceToDelete = null;
         let categoryChartInstance = null;
 
-        // Dark/Light Mode Logic
         function initTheme() {
             const savedTheme = localStorage.getItem('nour_erp_theme') || 'light';
             if (savedTheme === 'dark') {
@@ -688,7 +700,6 @@
             }
         }
 
-        // Initialize Local Storage
         function initStorage() {
             const savedProducts = localStorage.getItem('nour_erp_products');
             if (savedProducts) {
@@ -759,7 +770,6 @@
             document.getElementById('current-date').innerText = today;
         }
 
-        // Tab Navigation
         function switchTab(tabId) {
             ['dashboard', 'pos', 'inventory', 'products', 'invoices', 'orders'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.add('hidden');
@@ -769,6 +779,16 @@
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
             document.getElementById(`nav-${tabId}`).classList.add('active');
 
+            // غلق القائمة الجانبية تلقائياً على الموبايل عند الاختيار
+            if (window.innerWidth < 1024) {
+                const sidebar = document.getElementById('app-sidebar');
+                const backdrop = document.getElementById('sidebar-backdrop');
+                if(!sidebar.classList.contains('translate-x-full')) {
+                    sidebar.classList.add('translate-x-full');
+                    backdrop.classList.add('hidden');
+                }
+            }
+
             if (tabId === 'dashboard') renderDashboard();
             if (tabId === 'pos') renderPosSearchResults();
             if (tabId === 'inventory') renderInventoryTable();
@@ -777,7 +797,6 @@
             if (tabId === 'orders') renderOrdersList();
         }
 
-        // Toast Notification System
         function showToast(msg, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -796,7 +815,6 @@
             }, 3000);
         }
 
-        // Render Dashboard Stats & Charts
         function renderDashboard() {
             const totalSales = invoices.reduce((sum, i) => sum + (i.finalTotal || 0), 0);
             const totalProfit = invoices.reduce((sum, i) => sum + (i.profit || 0), 0);
@@ -860,7 +878,6 @@
             }
         }
 
-        // POS Search & Render
         function renderPosSearchResults() {
             const query = document.getElementById('pos-search').value.trim().toLowerCase();
             const container = document.getElementById('pos-search-results');
@@ -888,7 +905,7 @@
                         <p class="text-xs text-gray-400 mb-3">${prod.category}</p>
                     </div>
                     <div class="flex justify-between items-center pt-2 border-t dark:border-gray-700">
-                        <span class="text-lg font-black text-blue-600 dark:text-blue-400">${prod.price.toFixed(2)} ج.م</span>
+                        <span class="text-base sm:text-lg font-black text-blue-600 dark:text-blue-400">${prod.price.toFixed(2)} ج.م</span>
                         <button onclick="addToCart(${prod.id})" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1">
                             <i class="fa-solid fa-plus"></i> إضافة
                         </button>
@@ -897,7 +914,6 @@
             `).join('');
         }
 
-        // Cart Logic
         function addToCart(prodId) {
             const prod = products.find(p => p.id === prodId);
             if (!prod) return;
@@ -967,7 +983,7 @@
                             <span class="px-2 font-bold dark:text-white">${item.quantity}</span>
                             <button onclick="updateCartQty(${item.id}, ${item.quantity + 1})" class="px-2 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">+</button>
                         </div>
-                        <span class="font-bold text-blue-600 dark:text-blue-400 w-16 text-left">${(item.price * item.quantity).toFixed(2)}</span>
+                        <span class="font-bold text-blue-600 dark:text-blue-400 w-14 text-left">${(item.price * item.quantity).toFixed(2)}</span>
                     </div>
                 </div>
             `).join('');
@@ -999,7 +1015,6 @@
             document.getElementById('cart-expected-profit').innerText = expectedProfit.toFixed(2) + ' ج.م';
         }
 
-        // Checkout & Export Invoice
         function checkout() {
             if (cart.length === 0) {
                 showToast('السلة فارغة، يرجى إضافة أصناف أولاً', 'error');
@@ -1060,7 +1075,6 @@
             showToast(`تم استخراج وإصدار الفاتورة رقم #${newInvoice.id} بنجاح!`, 'success');
         }
 
-        // Inventory Render
         function renderInventoryTable() {
             const query = document.getElementById('inv-search').value.trim().toLowerCase();
             const filter = document.getElementById('inv-filter').value;
@@ -1095,7 +1109,6 @@
             `).join('');
         }
 
-        // Products Tab Render & Modals
         function renderProductsTable() {
             const query = document.getElementById('prod-search').value.trim().toLowerCase();
             const tbody = document.getElementById('products-table-body');
@@ -1212,7 +1225,6 @@
             selectedProductToDelete = null;
         }
 
-        // Invoices Tab Logic
         function renderInvoicesList() {
             const query = document.getElementById('invoices-search').value.trim().toLowerCase();
             const container = document.getElementById('invoices-list-container');
@@ -1242,7 +1254,7 @@
                 return `
                     <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 flex-wrap">
                                 <span class="font-bold text-blue-600 dark:text-blue-400 text-base">فاتورة #${inv.id}</span>
                                 <span class="text-xs bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 font-semibold px-2 py-0.5 rounded-full">${inv.paymentMethod}</span>
                                 <span class="text-xs text-gray-400">${dateFormatted}</span>
@@ -1254,7 +1266,7 @@
                         </div>
                         <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t md:border-0 dark:border-gray-700 pt-3 md:pt-0">
                             <div class="text-left">
-                                <p class="text-lg font-black text-gray-800 dark:text-white">${inv.finalTotal.toFixed(2)} ج.م</p>
+                                <p class="text-base sm:text-lg font-black text-gray-800 dark:text-white">${inv.finalTotal.toFixed(2)} ج.م</p>
                                 <p class="text-xs font-bold text-emerald-600 dark:text-emerald-400">الربح: ${inv.profit.toFixed(2)} ج.م</p>
                             </div>
                             <div class="flex gap-2">
@@ -1406,9 +1418,6 @@
             document.getElementById('print-modal').classList.add('hidden');
         }
 
-        // ==========================================
-        // وظائف تبويب "الطلبات" المضافة حديثاً
-        // ==========================================
         function renderOrdersList() {
             const container = document.getElementById('orders-list-container');
             document.getElementById('orders-count-label').innerText = orders.length + ' طلبات';
@@ -1423,7 +1432,7 @@
                 return `
                     <div class="p-4 hover:bg-gray-50 dark:hover:bg-gray-900 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-2 flex-wrap">
                                 <span class="font-bold text-purple-600 dark:text-purple-400 text-base">طلب إلكتروني #${ord.id}</span>
                                 <span class="text-xs bg-purple-50 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 font-semibold px-2 py-0.5 rounded-full">قيد المراجعة</span>
                                 <span class="text-xs text-gray-400">${dateFormatted}</span>
@@ -1435,7 +1444,7 @@
                         </div>
                         <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t md:border-0 dark:border-gray-700 pt-3 md:pt-0">
                             <div class="text-left">
-                                <p class="text-lg font-black text-gray-800 dark:text-white">${ord.finalTotal.toFixed(2)} ج.م</p>
+                                <p class="text-base sm:text-lg font-black text-gray-800 dark:text-white">${ord.finalTotal.toFixed(2)} ج.م</p>
                                 <p class="text-xs font-bold text-emerald-600 dark:text-emerald-400">الربح المتوقع: ${ord.profit.toFixed(2)} ج.م</p>
                             </div>
                             <div class="flex gap-2">
@@ -1452,7 +1461,6 @@
             }).join('');
         }
 
-        // زر محاكاة لاستقبال طلب من برنامج الموقع الخارجي للتجربة الفورية
         function simulateIncomingOrder() {
             const randomId = Date.now().toString().slice(-5);
             const sampleOrder = {
@@ -1476,14 +1484,12 @@
             showToast(`تم استلام طلب جديد برقم #${randomId} من الموقع الإلكتروني!`, 'info');
         }
 
-        // الموافقة على الطلب وتحويله لفاتورة مبيعات وخصمه من المخزون
         function approveOrder(orderId) {
             const index = orders.findIndex(o => o.id === orderId);
             if (index === -1) return;
 
             const order = orders[index];
 
-            // التحقق من توافر المخزون قبل الموافقة
             for (let item of order.items) {
                 const prod = products.find(p => p.id === item.id);
                 if (!prod || prod.stock < item.quantity) {
@@ -1492,14 +1498,12 @@
                 }
             }
 
-            // خصم الكميات من المخزون
             order.items.forEach(item => {
                 const prod = products.find(p => p.id === item.id);
                 if (prod) prod.stock -= item.quantity;
             });
             saveProductsToStorage();
 
-            // تحويل الطلب إلى فاتورة مبيعات معتمدة
             const newInvoice = {
                 id: order.id,
                 date: order.date,
@@ -1516,21 +1520,18 @@
             invoices.push(newInvoice);
             saveInvoicesToStorage();
 
-            // إزالة الطلب من قائمة الطلبات المعلقة
             orders.splice(index, 1);
             saveOrdersToStorage();
 
-            // تحديث الواجهات
             renderOrdersList();
             renderInvoicesList();
             renderDashboard();
             renderInventoryTable();
             renderPosSearchResults();
 
-            showToast(`تمت الموافقة على الطلب #${orderId} وتحويله إلى فاتورة بيع وخصمه من المخزون بنجاح!`, 'success');
+            showToast(`تمت الموافقة على الطلب #${orderId} وتحويله إلى فاتورة بيع وخصمه من المخزن بنجاح!`, 'success');
         }
 
-        // رفض الطلب وحذفه من الطلبات المعلقة
         function rejectOrder(orderId) {
             orders = orders.filter(o => o.id !== orderId);
             saveOrdersToStorage();
