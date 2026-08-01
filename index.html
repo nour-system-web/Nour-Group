@@ -276,6 +276,7 @@
                 <table class="w-full text-right text-sm">
                     <thead class="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300 font-semibold border-b dark:border-gray-700">
                         <tr>
+                            <th class="p-3.5">صورة الصنف</th>
                             <th class="p-3.5">الكود</th>
                             <th class="p-3.5">الصنف</th>
                             <th class="p-3.5">الفئة</th>
@@ -309,6 +310,7 @@
                 <table class="w-full text-right text-sm">
                     <thead class="bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-300 font-semibold border-b dark:border-gray-700">
                         <tr>
+                            <th class="p-3.5">الصورة</th>
                             <th class="p-3.5">الكود</th>
                             <th class="p-3.5">الباركود</th>
                             <th class="p-3.5">الاسم</th>
@@ -386,13 +388,28 @@
 
     <!-- Modals -->
     <div id="product-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center z-50 p-4">
-        <div class="bg-white dark:bg-gray-800 dark:text-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+        <div class="bg-white dark:bg-gray-800 dark:text-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b dark:border-gray-700 pb-3">
                 <h3 id="modal-title" class="font-bold text-gray-800 dark:text-white text-lg">تعديل الصنف</h3>
                 <button onclick="closeProductModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
             <form id="product-form" onsubmit="saveProduct(event)" class="space-y-3">
                 <input type="hidden" id="prod-id">
+                
+                <!-- خانة اللوجو/صورة المنتج الجديدة -->
+                <div>
+                    <label class="text-xs font-semibold text-gray-600 dark:text-gray-300 block mb-1">صورة أو لوجو المنتج (رابط صورة أو رفع ملف)</label>
+                    <div class="flex items-center gap-3">
+                        <div id="modal-image-preview-container" class="w-14 h-14 bg-gray-100 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 flex items-center justify-center overflow-hidden shrink-0">
+                            <img id="modal-image-preview" src="logo.png" alt="Preview" class="w-full h-full object-contain">
+                        </div>
+                        <div class="flex-1 space-y-1">
+                            <input type="text" id="modal-image" placeholder="رابط صورة مباشر (URL)..." class="w-full p-2 border dark:border-gray-700 rounded text-xs bg-white dark:bg-gray-900 dark:text-white">
+                            <input type="file" id="modal-image-file" accept="image/*" onchange="handleImageUpload(event)" class="w-full text-xs text-gray-500 file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-gray-700 dark:file:text-gray-200">
+                        </div>
+                    </div>
+                </div>
+
                 <div>
                     <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">الكود</label>
                     <input type="text" id="modal-code" required class="w-full p-2 border dark:border-gray-700 rounded text-sm mt-1 bg-white dark:bg-gray-900 dark:text-white">
@@ -506,85 +523,66 @@
     </div>
 
     <script>
-        // دالة مساعدة لتحديد شعار الشركة أو الصنف تلقائياً بناءً على اسم المنتج
-        function getProductLogo(productName) {
-            const name = productName.toLowerCase();
-            if (name.includes('شيبسي')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Chipsy_logo.svg/120px-Chipsy_logo.svg.png';
-            if (name.includes('تايجر')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Tiger_Chips_logo.svg/120px-Tiger_Chips_logo.svg.png';
-            if (name.includes('لايز') || name.includes('lays')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Lay%27s_logo.svg/120px-Lay%27s_logo.svg.png';
-            if (name.includes('دوريتوس')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Doritos_logo_%282013%29.svg/120px-Doritos_logo_%282013%29.svg.png';
-            if (name.includes('شيتوس')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Cheetos_logo.svg/120px-Cheetos_logo.svg.png';
-            if (name.includes('أريال')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/Ariel_logo_%282020%29.svg/120px-Ariel_logo_%282020%29.svg.png';
-            if (name.includes('تايد')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Tide_logo.svg/120px-Tide_logo.svg.png';
-            if (name.includes('برسيل')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Persil_logo.svg/120px-Persil_logo.svg.png';
-            if (name.includes('ليبتون')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Lipton_Logo.svg/120px-Lipton_Logo.svg.png';
-            if (name.includes('فيري') || name.includes('fairy')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Fairy_logo.svg/120px-Fairy_logo.svg.png';
-            if (name.includes('بريل')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Logo_placeholder_gray.svg/120px-Logo_placeholder_gray.svg.png';
-            if (name.includes('كلوركس')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Clorox_logo.svg/120px-Clorox_logo.svg.png';
-            // شعار افتراضي لوجوهات عامة أو غير مخصصة
-            return 'logo.png';
-        }
-
         // Default Products Data Imported directly from spreadsheet CSV
         const defaultProducts = [
-            { id: 1001, code: "1001", barcode: "6222002300016", name: "شاي العروسة ناعم - 40 جم", category: "شاي ناعم", price: 12, cost: 9.6, stock: 2 },
-            { id: 1002, code: "1002", barcode: "6222002300023", name: "شاي العروسة ناعم - 100 جم", category: "شاي ناعم", price: 28, cost: 22.4, stock: 88 },
-            { id: 1003, code: "1003", barcode: "6222002300030", name: "شاي العروسة ناعم - 250 جم", category: "شاي ناعم", price: 65, cost: 52, stock: 34 },
-            { id: 1004, code: "1004", barcode: "6222002300122", name: "شاي العروسة فتلة - 25 فتلة", category: "شاي فتلة", price: 22, cost: 17.6, stock: 22 },
-            { id: 1005, code: "1005", barcode: "6222002300153", name: "شاي العروسة فتلة - 100 فتلة", category: "شاي فتلة", price: 75, cost: 60, stock: 15 },
-            { id: 1006, code: "1006", barcode: "6221048700415", name: "شاي ليبتون أسود ناعم - 40 جم", category: "شاي ناعم", price: 15, cost: 12, stock: 48 },
-            { id: 1007, code: "1007", barcode: "6221048700439", name: "شاي ليبتون أسود ناعم - 100 جم", category: "شاي ناعم", price: 35, cost: 28, stock: 53 },
-            { id: 1008, code: "1008", barcode: "5063305009548", name: "شاي ليبتون أسود ناعم - 250 جم", category: "شاي ناعم", price: 80, cost: 64, stock: 30 },
-            { id: 1009, code: "1009", barcode: "6221048700118", name: "شاي ليبتون فتلة - 25 فتلة", category: "شاي فتلة", price: 28, cost: 22.4, stock: 65 },
-            { id: 1010, code: "1010", barcode: "6221048700736", name: "شاي ليبتون فتلة - 100 فتلة", category: "شاي فتلة", price: 95, cost: 76, stock: 33 },
-            { id: 1011, code: "1011", barcode: "6221048701108", name: "شاي ليبتون أخضر فتلة - 25 فتلة", category: "شاي أخضر", price: 32, cost: 25.6, stock: 20 },
-            { id: 1012, code: "1012", barcode: "6223006100125", name: "شاي أحمد تي أسود (أوراق كاملة) - 100 جم", category: "شاي فاخر", price: 65, cost: 52, stock: 100 },
-            { id: 1013, code: "1013", barcode: "6223006100156", name: "شاي أحمد تي إيرل جراي - 100 جم", category: "شاي فاخر", price: 70, cost: 56, stock: 85 },
-            { id: 1014, code: "1014", barcode: "6223006100224", name: "شاي أحمد تي أخضر فتلة - 25 فتلة", category: "شاي أخضر", price: 45, cost: 36, stock: 12 },
-            { id: 1015, code: "1015", barcode: "6224001200119", name: "شاي الربيع إكسبريس فتلة - 100 فتلة", category: "شاي فتلة", price: 85, cost: 68, stock: 14 },
-            { id: 1016, code: "1016", barcode: "6224001200140", name: "شاي الربيع أوراق كاملة - 200 جم", category: "شاي فاخر", price: 90, cost: 72, stock: 57 },
-            { id: 1017, code: "1017", barcode: "6224001200256", name: "شاي الربيع أوراق بالنعناع - 300 جم", category: "شاي بالنعناع", price: 105, cost: 84, stock: 70 },
-            { id: 1018, code: "1018", barcode: "6224001200287", name: "شاي الربيع أوراق الجوافة - 100 جم", category: "شاي ناعم", price: 200, cost: 160, stock: 40 },
-            { id: 1019, code: "1019", barcode: "6221000001001", name: "شيبسي - طماطم", category: "عائلي", price: 10, cost: 8, stock: 30 },
-            { id: 1020, code: "1020", barcode: "6221000001002", name: "شيبسي - جبنة متبلة", category: "عائلي", price: 10, cost: 8, stock: 40 },
-            { id: 1021, code: "1021", barcode: "6221000001003", name: "شيبسي - شطة وليمون", category: "عائلي", price: 10, cost: 8, stock: 8 },
-            { id: 1022, code: "1022", barcode: "6221000001004", name: "شيبسي - ملح", category: "وسط", price: 5, cost: 4, stock: 84 },
-            { id: 1023, code: "1023", barcode: "6221000001005", name: "شيبسي - كباب", category: "وسط", price: 5, cost: 4, stock: 250 },
-            { id: 1024, code: "1024", barcode: "6221000001006", name: "تايجر - جبنة", category: "كبير", price: 7, cost: 5.6, stock: 221 },
-            { id: 1025, code: "1025", barcode: "6221000001007", name: "تايجر - شطة وليمون", category: "كبير", price: 7, cost: 5.6, stock: 33 },
-            { id: 1026, code: "1026", barcode: "6221000001008", name: "تايجر - طماطم", category: "صغير", price: 3, cost: 2.4, stock: 445 },
-            { id: 1027, code: "1027", barcode: "6221000001009", name: "لايز - ملح كلاسيك", category: "عائلي", price: 15, cost: 12, stock: 14 },
-            { id: 1028, code: "1028", barcode: "6221000001010", name: "لايز - خل وملح", category: "عائلي", price: 15, cost: 12, stock: 221 },
-            { id: 1029, code: "1029", barcode: "6221000001011", name: "دوريتوس - جبنة ناتشو", category: "كبير", price: 10, cost: 8, stock: 99 },
-            { id: 1030, code: "1030", barcode: "6221000001012", name: "دوريتوس - فلفل حلو", category: "كبير", price: 10, cost: 8, stock: 100 },
-            { id: 1031, code: "1031", barcode: "6221000001013", name: "دوريتوس - حار نار", category: "وسط", price: 5, cost: 4, stock: 883 },
-            { id: 1032, code: "1032", barcode: "6221000001014", name: "شيتوس - كرنشي جبنة", category: "كبير", price: 8, cost: 6.4, stock: 337 },
-            { id: 1033, code: "1033", barcode: "6221000001015", name: "شيتوس - حار نار", category: "كبير", price: 8, cost: 6.4, stock: 60 },
-            { id: 1034, code: "1034", barcode: "6221000001016", name: "بيك رولز - بيتزا", category: "وسط", price: 7, cost: 5.6, stock: 255 },
-            { id: 1035, code: "1035", barcode: "6221000001017", name: "بيك رولز - كاتشب", category: "وسط", price: 7, cost: 5.6, stock: 554 },
-            { id: 1036, code: "1036", barcode: "6221000001018", name: "فوكس - جبنة فرنسية", category: "وسط", price: 4, cost: 3.2, stock: 228 },
-            { id: 1037, code: "1037", barcode: "6221000001019", name: "فوكس - طماطم", category: "وسط", price: 4, cost: 3.2, stock: 111 },
-            { id: 1038, code: "1038", barcode: "6221000001020", name: "ويندوز - جبنة", category: "صغير", price: 10, cost: 8, stock: 333 },
-            { id: 1039, code: "1039", barcode: "6222001010013", name: "وفير سائل غسيل أطباق بالليمون - 1 لتر", category: "منظف أواني", price: 65, cost: 52, stock: 889 },
-            { id: 1040, code: "1040", barcode: "6222001010030", name: "بريل سائل غسيل أواني مركز - 1 لتر", category: "منظف أواني", price: 22, cost: 17.6, stock: 677 },
-            { id: 1041, code: "1041", barcode: "6222001010037", name: "بريل سائل غسيل أواني - 600 مل", category: "منظف أواني", price: 38, cost: 30.4, stock: 223 },
-            { id: 1042, code: "1042", barcode: "6222001010044", name: "فيرا سائل غسيل أواني بالليمون - 2.5 لتر", category: "منظف أواني", price: 25, cost: 20, stock: 558 },
-            { id: 1043, code: "1043", barcode: "6222001010051", name: "فيري سائل غسيل أطباق للأيد الحساسة - 650 مل", category: "منظف أواني", price: 45, cost: 36, stock: 44 },
-            { id: 1044, code: "1044", barcode: "6222001010068", name: "أريال أوتوماتيك بودرة بالافندر - 4 كجم", category: "مسحوق غسيل", price: 200, cost: 160, stock: 33 },
-            { id: 1045, code: "1045", barcode: "6222002020012", name: "أريال أوتوماتيك جيل للغسالات - 2.5 لتر", category: "مسحوق غسيل", price: 240, cost: 192, stock: 99 },
-            { id: 1046, code: "1046", barcode: "6222002020029", name: "تايد أوتوماتيك بودرة للغسالات - 5 كجم", category: "مسحوق غسيل", price: 185, cost: 148, stock: 200 },
-            { id: 1047, code: "1047", barcode: "6222002020036", name: "تايد أوتوماتيك جيل بالياسمين - 2.5 لتر", category: "مسحوق غسيل", price: 220, cost: 176, stock: 70 },
-            { id: 1048, code: "1048", barcode: "6222002020043", name: "أوكسي أوتوماتيك بودرة بالافندر - 4.25 كجم", category: "مسحوق غسيل", price: 160, cost: 128, stock: 116 },
-            { id: 1049, code: "1049", barcode: "6222002020060", name: "أوكسي يدوي/عادي بودرة - 1 كجم", category: "مسحوق غسيل", price: 195, cost: 156, stock: 336 },
-            { id: 1050, code: "1050", barcode: "6222002020067", name: "برسيل أوتوماتيك بودرة - 5 كجم", category: "مسحوق غسيل", price: 38, cost: 30.4, stock: 390 },
-            { id: 1051, code: "1051", barcode: "6222002020074", name: "برسيل جيل أوتوماتيك برائحة النظافة - 3.9 لتر", category: "مسحوق غسيل", price: 230, cost: 184, stock: 229 },
-            { id: 1052, code: "1052", barcode: "6222002020081", name: "برسيل أسود (بلاك) للعبايات والملابس الداكنة - 2.5 لتر", category: "مسحوق غسيل", price: 180, cost: 144, stock: 150 },
-            { id: 1060, code: "1060", barcode: "6222004040041", name: "كلوركس ألوان للملابس الملونة - 1 لتر", category: "مطهرات وبياض", price: 22, cost: 17.6, stock: 100 },
-            { id: 1061, code: "1061", barcode: "6222004040058", name: "كلوركس 5 في 1 منظف أرضيات برائحة الصنوبر - 1.5 لتر", category: "العناية بالملابس", price: 35, cost: 28, stock: 203 },
-            { id: 1062, code: "1062", barcode: "6222004040065", name: "جلانس منظف وملمع زجاج - 600 مل (بخاخ)", category: "منظف أرضيات", price: 48, cost: 38.4, stock: 224 },
-            { id: 1063, code: "1063", barcode: "6222005050019", name: "سيـف (Cif) كريم منظف أسطح ودهون - 500 مل", category: "ملمع زجاج", price: 28, cost: 22.4, stock: 299 },
-            { id: 1064, code: "1064", barcode: "6222005050026", name: "ستريس مزيل دهون المطبخ والبوتجاز - 700 مل", category: "مذيب دهون", price: 55, cost: 44, stock: 500 },
-            { id: 1065, code: "1065", barcode: "6222005050033", name: "هاربيك منظف ومطهر التواليت - 700 مل", category: "مذيب دهون", price: 60, cost: 48, stock: 699 }
+            { id: 1001, code: "1001", barcode: "6222002300016", name: "شاي العروسة ناعم - 40 جم", category: "شاي ناعم", price: 12, cost: 9.6, stock: 2, image: "logo.png" },
+            { id: 1002, code: "1002", barcode: "6222002300023", name: "شاي العروسة ناعم - 100 جم", category: "شاي ناعم", price: 28, cost: 22.4, stock: 88, image: "logo.png" },
+            { id: 1003, code: "1003", barcode: "6222002300030", name: "شاي العروسة ناعم - 250 جم", category: "شاي ناعم", price: 65, cost: 52, stock: 34, image: "logo.png" },
+            { id: 1004, code: "1004", barcode: "6222002300122", name: "شاي العروسة فتلة - 25 فتلة", category: "شاي فتلة", price: 22, cost: 17.6, stock: 22, image: "logo.png" },
+            { id: 1005, code: "1005", barcode: "6222002300153", name: "شاي العروسة فتلة - 100 فتلة", category: "شاي فتلة", price: 75, cost: 60, stock: 15, image: "logo.png" },
+            { id: 1006, code: "1006", barcode: "6221048700415", name: "شاي ليبتون أسود ناعم - 40 جم", category: "شاي ناعم", price: 15, cost: 12, stock: 48, image: "logo.png" },
+            { id: 1007, code: "1007", barcode: "6221048700439", name: "شاي ليبتون أسود ناعم - 100 جم", category: "شاي ناعم", price: 35, cost: 28, stock: 53, image: "logo.png" },
+            { id: 1008, code: "1008", barcode: "5063305009548", name: "شاي ليبتون أسود ناعم - 250 جم", category: "شاي ناعم", price: 80, cost: 64, stock: 30, image: "logo.png" },
+            { id: 1009, code: "1009", barcode: "6221048700118", name: "شاي ليبتون فتلة - 25 فتلة", category: "شاي فتلة", price: 28, cost: 22.4, stock: 65, image: "logo.png" },
+            { id: 1010, code: "1010", barcode: "6221048700736", name: "شاي ليبتون فتلة - 100 فتلة", category: "شاي فتلة", price: 95, cost: 76, stock: 33, image: "logo.png" },
+            { id: 1011, code: "1011", barcode: "6221048701108", name: "شاي ليبتون أخضر فتلة - 25 فتلة", category: "شاي أخضر", price: 32, cost: 25.6, stock: 20, image: "logo.png" },
+            { id: 1012, code: "1012", barcode: "6223006100125", name: "شاي أحمد تي أسود (أوراق كاملة) - 100 جم", category: "شاي فاخر", price: 65, cost: 52, stock: 100, image: "logo.png" },
+            { id: 1013, code: "1013", barcode: "6223006100156", name: "شاي أحمد تي إيرل جراي - 100 جم", category: "شاي فاخر", price: 70, cost: 56, stock: 85, image: "logo.png" },
+            { id: 1014, code: "1014", barcode: "6223006100224", name: "شاي أحمد تي أخضر فتلة - 25 فتلة", category: "شاي أخضر", price: 45, cost: 36, stock: 12, image: "logo.png" },
+            { id: 1015, code: "1015", barcode: "6224001200119", name: "شاي الربيع إكسبريس فتلة - 100 فتلة", category: "شاي فتلة", price: 85, cost: 68, stock: 14, image: "logo.png" },
+            { id: 1016, code: "1016", barcode: "6224001200140", name: "شاي الربيع أوراق كاملة - 200 جم", category: "شاي فاخر", price: 90, cost: 72, stock: 57, image: "logo.png" },
+            { id: 1017, code: "1017", barcode: "6224001200256", name: "شاي الربيع أوراق بالنعناع - 300 جم", category: "شاي بالنعناع", price: 105, cost: 84, stock: 70, image: "logo.png" },
+            { id: 1018, code: "1018", barcode: "6224001200287", name: "شاي الربيع أوراق الجوافة - 100 جم", category: "شاي ناعم", price: 200, cost: 160, stock: 40, image: "logo.png" },
+            { id: 1019, code: "1019", barcode: "6221000001001", name: "شيبسي - طماطم", category: "عائلي", price: 10, cost: 8, stock: 30, image: "logo.png" },
+            { id: 1020, code: "1020", barcode: "6221000001002", name: "شيبسي - جبنة متبلة", category: "عائلي", price: 10, cost: 8, stock: 40, image: "logo.png" },
+            { id: 1021, code: "1021", barcode: "6221000001003", name: "شيبسي - شطة وليمون", category: "عائلي", price: 10, cost: 8, stock: 8, image: "logo.png" },
+            { id: 1022, code: "1022", barcode: "6221000001004", name: "شيبسي - ملح", category: "وسط", price: 5, cost: 4, stock: 84, image: "logo.png" },
+            { id: 1023, code: "1023", barcode: "6221000001005", name: "شيبسي - كباب", category: "وسط", price: 5, cost: 4, stock: 250, image: "logo.png" },
+            { id: 1024, code: "1024", barcode: "6221000001006", name: "تايجر - جبنة", category: "كبير", price: 7, cost: 5.6, stock: 221, image: "logo.png" },
+            { id: 1025, code: "1025", barcode: "6221000001007", name: "تايجر - شطة وليمون", category: "كبير", price: 7, cost: 5.6, stock: 33, image: "logo.png" },
+            { id: 1026, code: "1026", barcode: "6221000001008", name: "تايجر - طماطم", category: "صغير", price: 3, cost: 2.4, stock: 445, image: "logo.png" },
+            { id: 1027, code: "1027", barcode: "6221000001009", name: "لايز - ملح كلاسيك", category: "عائلي", price: 15, cost: 12, stock: 14, image: "logo.png" },
+            { id: 1028, code: "1028", barcode: "6221000001010", name: "لايز - خل وملح", category: "عائلي", price: 15, cost: 12, stock: 221, image: "logo.png" },
+            { id: 1029, code: "1029", barcode: "6221000001011", name: "دوريتوس - جبنة ناتشو", category: "كبير", price: 10, cost: 8, stock: 99, image: "logo.png" },
+            { id: 1030, code: "1030", barcode: "6221000001012", name: "دوريتوس - فلفل حلو", category: "كبير", price: 10, cost: 8, stock: 100, image: "logo.png" },
+            { id: 1031, code: "1031", barcode: "6221000001013", name: "دوريتوس - حار نار", category: "وسط", price: 5, cost: 4, stock: 883, image: "logo.png" },
+            { id: 1032, code: "1032", barcode: "6221000001014", name: "شيتوس - كرنشي جبنة", category: "كبير", price: 8, cost: 6.4, stock: 337, image: "logo.png" },
+            { id: 1033, code: "1033", barcode: "6221000001015", name: "شيتوس - حار نار", category: "كبير", price: 8, cost: 6.4, stock: 60, image: "logo.png" },
+            { id: 1034, code: "1034", barcode: "6221000001016", name: "بيك رولز - بيتزا", category: "وسط", price: 7, cost: 5.6, stock: 255, image: "logo.png" },
+            { id: 1035, code: "1035", barcode: "6221000001017", name: "بيك رولز - كاتشب", category: "وسط", price: 7, cost: 5.6, stock: 554, image: "logo.png" },
+            { id: 1036, code: "1036", barcode: "6221000001018", name: "فوكس - جبنة فرنسية", category: "وسط", price: 4, cost: 3.2, stock: 228, image: "logo.png" },
+            { id: 1037, code: "1037", barcode: "6221000001019", name: "فوكس - طماطم", category: "وسط", price: 4, cost: 3.2, stock: 111, image: "logo.png" },
+            { id: 1038, code: "1038", barcode: "6221000001020", name: "ويندوز - جبنة", category: "صغير", price: 10, cost: 8, stock: 333, image: "logo.png" },
+            { id: 1039, code: "1039", barcode: "6222001010013", name: "وفير سائل غسيل أطباق بالليمون - 1 لتر", category: "منظف أواني", price: 65, cost: 52, stock: 889, image: "logo.png" },
+            { id: 1040, code: "1040", barcode: "6222001010030", name: "بريل سائل غسيل أواني مركز - 1 لتر", category: "منظف أواني", price: 22, cost: 17.6, stock: 677, image: "logo.png" },
+            { id: 1041, code: "1041", barcode: "6222001010037", name: "بريل سائل غسيل أواني - 600 مل", category: "منظف أواني", price: 38, cost: 30.4, stock: 223, image: "logo.png" },
+            { id: 1042, code: "1042", barcode: "6222001010044", name: "فيرا سائل غسيل أواني بالليمون - 2.5 لتر", category: "منظف أواني", price: 25, cost: 20, stock: 558, image: "logo.png" },
+            { id: 1043, code: "1043", barcode: "6222001010051", name: "فيري سائل غسيل أطباق للأيد الحساسة - 650 مل", category: "منظف أواني", price: 45, cost: 36, stock: 44, image: "logo.png" },
+            { id: 1044, code: "1044", barcode: "6222001010068", name: "أريال أوتوماتيك بودرة بالافندر - 4 كجم", category: "مسحوق غسيل", price: 200, cost: 160, stock: 33, image: "logo.png" },
+            { id: 1045, code: "1045", barcode: "6222002020012", name: "أريال أوتوماتيك جيل للغسالات - 2.5 لتر", category: "مسحوق غسيل", price: 240, cost: 192, stock: 99, image: "logo.png" },
+            { id: 1046, code: "1046", barcode: "6222002020029", name: "تايد أوتوماتيك بودرة للغسالات - 5 كجم", category: "مسحوق غسيل", price: 185, cost: 148, stock: 200, image: "logo.png" },
+            { id: 1047, code: "1047", barcode: "6222002020036", name: "تايد أوتوماتيك جيل بالياسمين - 2.5 لتر", category: "مسحوق غسيل", price: 220, cost: 176, stock: 70, image: "logo.png" },
+            { id: 1048, code: "1048", barcode: "6222002020043", name: "أوكسي أوتوماتيك بودرة بالافندر - 4.25 كجم", category: "مسحوق غسيل", price: 160, cost: 128, stock: 116, image: "logo.png" },
+            { id: 1049, code: "1049", barcode: "6222002020060", name: "أوكسي يدوي/عادي بودرة - 1 كجم", category: "مسحوق غسيل", price: 195, cost: 156, stock: 336, image: "logo.png" },
+            { id: 1050, code: "1050", barcode: "6222002020067", name: "برسيل أوتوماتيك بودرة - 5 كجم", category: "مسحوق غسيل", price: 38, cost: 30.4, stock: 390, image: "logo.png" },
+            { id: 1051, code: "1051", barcode: "6222002020074", name: "برسيل جيل أوتوماتيك برائحة النظافة - 3.9 لتر", category: "مسحوق غسيل", price: 230, cost: 184, stock: 229, image: "logo.png" },
+            { id: 1052, code: "1052", barcode: "6222002020081", name: "برسيل أسود (بلاك) للعبايات والملابس الداكنة - 2.5 لتر", category: "مسحوق غسيل", price: 180, cost: 144, stock: 150, image: "logo.png" },
+            { id: 1060, code: "1060", barcode: "6222004040041", name: "كلوركس ألوان للملابس الملونة - 1 لتر", category: "مطهرات وبياض", price: 22, cost: 17.6, stock: 100, image: "logo.png" },
+            { id: 1061, code: "1061", barcode: "6222004040058", name: "كلوركس 5 في 1 منظف أرضيات برائحة الصنوبر - 1.5 لتر", category: "العناية بالملابس", price: 35, cost: 28, stock: 203, image: "logo.png" },
+            { id: 1062, code: "1062", barcode: "6222004040065", name: "جلانس منظف وملمع زجاج - 600 مل (بخاخ)", category: "منظف أرضيات", price: 48, cost: 38.4, stock: 224, image: "logo.png" },
+            { id: 1063, code: "1063", barcode: "6222005050019", name: "سيـف (Cif) كريم منظف أسطح ودهون - 500 مل", category: "ملمع زجاج", price: 28, cost: 22.4, stock: 299, image: "logo.png" },
+            { id: 1064, code: "1064", barcode: "6222005050026", name: "ستريس مزيل دهون المطبخ والبوتجاز - 700 مل", category: "مذيب دهون", price: 55, cost: 44, stock: 500, image: "logo.png" },
+            { id: 1065, code: "1065", barcode: "6222005050033", name: "هاربيك منظف ومطهر التواليت - 700 مل", category: "مذيب دهون", price: 60, cost: 48, stock: 699, image: "logo.png" }
         ];
 
         let products = [];
@@ -667,7 +665,7 @@
                         sellerName: "أونلاين",
                         paymentMethod: "تحويل بنكي",
                         items: [
-                            { id: 1002, name: "شاي العروسة ناعم - 100 جم", category: "شاي ناعم", price: 28, cost: 22.4, quantity: 2 }
+                            { id: 1002, name: "شاي العروسة ناعم - 100 جم", category: "شاي ناعم", price: 28, cost: 22.4, quantity: 2, image: "logo.png" }
                         ],
                         subtotal: 56,
                         discount: 0,
@@ -806,7 +804,6 @@
             }
         }
 
-        // POS Search & Render (تم إضافة عرض لوجو الشركة لكل صنف بجوار اسمه)
         function renderPosSearchResults() {
             const query = document.getElementById('pos-search').value.trim().toLowerCase();
             const container = document.getElementById('pos-search-results');
@@ -823,32 +820,26 @@
                 return;
             }
 
-            container.innerHTML = filtered.map(prod => {
-                const logoUrl = getProductLogo(prod.name);
-                return `
-                    <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between hover:border-blue-300 transition">
-                        <div>
-                            <div class="flex justify-between items-start mb-2">
-                                <span class="text-xs bg-gray-100 dark:bg-gray-700 font-bold px-2 py-0.5 rounded text-gray-600 dark:text-gray-300">كود: ${prod.code}</span>
-                                <span class="text-xs ${prod.stock <= 10 ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-700'} font-bold px-2 py-0.5 rounded">مخزون: ${prod.stock}</span>
+            container.innerHTML = filtered.map(prod => `
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between hover:border-blue-300 transition">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="w-10 h-10 bg-gray-50 dark:bg-gray-900 rounded-lg p-1 border dark:border-gray-700 flex items-center justify-center overflow-hidden">
+                                <img src="${prod.image || 'logo.png'}" alt="Logo" class="w-full h-full object-contain">
                             </div>
-                            <div class="flex items-center gap-2.5 mb-2">
-                                <div class="w-8 h-8 bg-gray-50 dark:bg-gray-700 p-1 rounded-lg border border-gray-100 dark:border-gray-600 flex items-center justify-center shrink-0">
-                                    <img src="${logoUrl}" alt="Logo" class="max-h-full max-w-full object-contain">
-                                </div>
-                                <h4 class="font-bold text-gray-800 dark:text-white text-sm line-clamp-1">${prod.name}</h4>
-                            </div>
-                            <p class="text-xs text-gray-400 mb-3">${prod.category}</p>
+                            <span class="text-xs ${prod.stock <= 10 ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-700'} font-bold px-2 py-0.5 rounded">مخزون: ${prod.stock}</span>
                         </div>
-                        <div class="flex justify-between items-center pt-2 border-t dark:border-gray-700">
-                            <span class="text-lg font-black text-blue-600 dark:text-blue-400">${prod.price.toFixed(2)} ج.م</span>
-                            <button onclick="addToCart(${prod.id})" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1">
-                                <i class="fa-solid fa-plus"></i> إضافة
-                            </button>
-                        </div>
+                        <h4 class="font-bold text-gray-800 dark:text-white text-sm mb-1">${prod.name}</h4>
+                        <p class="text-xs text-gray-400 mb-3">${prod.category} | كود: ${prod.code}</p>
                     </div>
-                `;
-            }).join('');
+                    <div class="flex justify-between items-center pt-2 border-t dark:border-gray-700">
+                        <span class="text-lg font-black text-blue-600 dark:text-blue-400">${prod.price.toFixed(2)} ج.م</span>
+                        <button onclick="addToCart(${prod.id})" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1">
+                            <i class="fa-solid fa-plus"></i> إضافة
+                        </button>
+                    </div>
+                </div>
+            `).join('');
         }
 
         function addToCart(prodId) {
@@ -899,7 +890,6 @@
             renderCart();
         }
 
-        // Render Cart (مع إظهار اللوجو بجوار المنتج داخل السلة أيضاً)
         function renderCart() {
             const container = document.getElementById('cart-items-container');
 
@@ -909,30 +899,25 @@
                 return;
             }
 
-            container.innerHTML = cart.map(item => {
-                const logoUrl = getProductLogo(item.name);
-                return `
-                    <div class="py-2.5 flex justify-between items-center text-xs">
-                        <div class="flex items-center gap-2 flex-1 pr-1">
-                            <div class="w-6 h-6 bg-white dark:bg-gray-800 p-0.5 rounded border border-gray-200 dark:border-gray-700 flex items-center justify-center shrink-0">
-                                <img src="${logoUrl}" alt="Logo" class="max-h-full max-w-full object-contain">
-                            </div>
-                            <div>
-                                <p class="font-bold text-gray-800 dark:text-white line-clamp-1">${item.name}</p>
-                                <p class="text-gray-400">${item.price.toFixed(2)} ج.م</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="flex items-center border dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 overflow-hidden">
-                                <button onclick="updateCartQty(${item.id}, ${item.quantity - 1})" class="px-2 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">-</button>
-                                <span class="px-2 font-bold dark:text-white">${item.quantity}</span>
-                                <button onclick="updateCartQty(${item.id}, ${item.quantity + 1})" class="px-2 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">+</button>
-                            </div>
-                            <span class="font-bold text-blue-600 dark:text-blue-400 w-14 text-left">${(item.price * item.quantity).toFixed(2)}</span>
+            container.innerHTML = cart.map(item => `
+                <div class="py-2.5 flex justify-between items-center text-xs">
+                    <div class="flex items-center gap-2 flex-1 pr-1">
+                        <img src="${item.image || 'logo.png'}" class="w-8 h-8 object-contain rounded bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 shrink-0">
+                        <div>
+                            <p class="font-bold text-gray-800 dark:text-white line-clamp-1">${item.name}</p>
+                            <p class="text-gray-400">${item.price.toFixed(2)} ج.م</p>
                         </div>
                     </div>
-                `;
-            }).join('');
+                    <div class="flex items-center gap-2">
+                        <div class="flex items-center border dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 overflow-hidden">
+                            <button onclick="updateCartQty(${item.id}, ${item.quantity - 1})" class="px-2 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">-</button>
+                            <span class="px-2 font-bold dark:text-white">${item.quantity}</span>
+                            <button onclick="updateCartQty(${item.id}, ${item.quantity + 1})" class="px-2 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">+</button>
+                        </div>
+                        <span class="font-bold text-blue-600 dark:text-blue-400 w-16 text-left">${(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                </div>
+            `).join('');
 
             calculateCartTotals();
         }
@@ -1021,7 +1006,6 @@
             showToast(`تم استخراج وإصدار الفاتورة رقم #${newInvoice.id} بنجاح!`, 'success');
         }
 
-        // Inventory Render (مع إظهار اللوجو بجوار الصنف في جدول المخزون)
         function renderInventoryTable() {
             const query = document.getElementById('inv-search').value.trim().toLowerCase();
             const filter = document.getElementById('inv-filter').value;
@@ -1040,31 +1024,25 @@
             document.getElementById('inv-total-quantity').innerText = products.reduce((sum, p) => sum + p.stock, 0);
             document.getElementById('inv-low-items').innerText = products.filter(p => p.stock <= 10).length;
 
-            tbody.innerHTML = filtered.map(p => {
-                const logoUrl = getProductLogo(p.name);
-                return `
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b dark:border-gray-700">
-                        <td class="p-3.5 font-bold text-gray-700 dark:text-gray-300">${p.code}</td>
-                        <td class="p-3.5 font-bold text-gray-800 dark:text-white flex items-center gap-2.5">
-                            <div class="w-7 h-7 bg-white dark:bg-gray-800 p-0.5 rounded border border-gray-200 dark:border-gray-700 flex items-center justify-center shrink-0">
-                                <img src="${logoUrl}" alt="Logo" class="max-h-full max-w-full object-contain">
-                            </div>
-                            <span>${p.name}</span>
-                        </td>
-                        <td class="p-3.5 text-gray-500">${p.category}</td>
-                        <td class="p-3.5 font-bold ${p.stock <= 10 ? 'text-rose-600' : 'text-emerald-600'}">${p.stock} قطعة</td>
-                        <td class="p-3.5 font-semibold text-gray-800 dark:text-gray-200">${p.price.toFixed(2)} ج.م</td>
-                        <td class="p-3.5">
-                            <span class="px-2.5 py-1 rounded-full text-xs font-bold ${p.stock <= 10 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">
-                                ${p.stock <= 10 ? 'مخزون منخفض' : 'متوفر بالمخزن'}
-                            </span>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
+            tbody.innerHTML = filtered.map(p => `
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b dark:border-gray-700">
+                    <td class="p-3.5">
+                        <img src="${p.image || 'logo.png'}" class="w-10 h-10 object-contain rounded-lg bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 p-1">
+                    </td>
+                    <td class="p-3.5 font-bold text-gray-700 dark:text-gray-300">${p.code}</td>
+                    <td class="p-3.5 font-bold text-gray-800 dark:text-white">${p.name}</td>
+                    <td class="p-3.5 text-gray-500">${p.category}</td>
+                    <td class="p-3.5 font-bold ${p.stock <= 10 ? 'text-rose-600' : 'text-emerald-600'}">${p.stock} قطعة</td>
+                    <td class="p-3.5 font-semibold text-gray-800 dark:text-gray-200">${p.price.toFixed(2)} ج.م</td>
+                    <td class="p-3.5">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold ${p.stock <= 10 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">
+                            ${p.stock <= 10 ? 'مخزون منخفض' : 'متوفر بالمخزن'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
         }
 
-        // Products Tab Render & Modals (مع إظهار اللوجو بجوار الصنف في دليل الأصناف)
         function renderProductsTable() {
             const query = document.getElementById('prod-search').value.trim().toLowerCase();
             const tbody = document.getElementById('products-table-body');
@@ -1076,31 +1054,40 @@
                 p.category.toLowerCase().includes(query)
             );
 
-            tbody.innerHTML = filtered.map(p => {
-                const logoUrl = getProductLogo(p.name);
-                return `
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b dark:border-gray-700">
-                        <td class="p-3.5 font-bold text-gray-700 dark:text-gray-300">${p.code}</td>
-                        <td class="p-3.5 font-mono text-xs text-gray-500">${p.barcode || '-'}</td>
-                        <td class="p-3.5 font-bold text-gray-800 dark:text-white flex items-center gap-2.5">
-                            <div class="w-7 h-7 bg-white dark:bg-gray-800 p-0.5 rounded border border-gray-200 dark:border-gray-700 flex items-center justify-center shrink-0">
-                                <img src="${logoUrl}" alt="Logo" class="max-h-full max-w-full object-contain">
-                            </div>
-                            <span>${p.name}</span>
-                        </td>
-                        <td class="p-3.5 text-gray-500">${p.category}</td>
-                        <td class="p-3.5 font-bold text-blue-600 dark:text-blue-400">${p.price.toFixed(2)} ج.م</td>
-                        <td class="p-3.5 font-semibold text-gray-600 dark:text-gray-400">${p.cost.toFixed(2)} ج.م</td>
-                        <td class="p-3.5 font-bold ${p.stock <= 10 ? 'text-rose-600' : 'text-gray-800 dark:text-white'}">${p.stock}</td>
-                        <td class="p-3.5 text-center">
-                            <div class="flex justify-center gap-2">
-                                <button onclick="openProductModal(${p.id})" class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg"><i class="fa-solid fa-pen-to-square"></i></button>
-                                <button onclick="openDeleteProductModal(${p.id})" class="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-gray-700 rounded-lg"><i class="fa-solid fa-trash-can"></i></button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
+            tbody.innerHTML = filtered.map(p => `
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b dark:border-gray-700">
+                    <td class="p-3.5">
+                        <img src="${p.image || 'logo.png'}" class="w-10 h-10 object-contain rounded-lg bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 p-1">
+                    </td>
+                    <td class="p-3.5 font-bold text-gray-700 dark:text-gray-300">${p.code}</td>
+                    <td class="p-3.5 font-mono text-xs text-gray-500">${p.barcode || '-'}</td>
+                    <td class="p-3.5 font-bold text-gray-800 dark:text-white">${p.name}</td>
+                    <td class="p-3.5 text-gray-500">${p.category}</td>
+                    <td class="p-3.5 font-bold text-blue-600 dark:text-blue-400">${p.price.toFixed(2)} ج.م</td>
+                    <td class="p-3.5 font-semibold text-gray-600 dark:text-gray-400">${p.cost.toFixed(2)} ج.م</td>
+                    <td class="p-3.5 font-bold ${p.stock <= 10 ? 'text-rose-600' : 'text-gray-800 dark:text-white'}">${p.stock}</td>
+                    <td class="p-3.5 text-center">
+                        <div class="flex justify-center gap-2">
+                            <button onclick="openProductModal(${p.id})" class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="openDeleteProductModal(${p.id})" class="p-2 text-rose-600 hover:bg-rose-50 dark:hover:bg-gray-700 rounded-lg"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // معالجة اختيار ملف صورة الجهاز وتحويله لـ Base64 ومعاينته فورياً
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const base64String = event.target.result;
+                    document.getElementById('modal-image').value = base64String;
+                    document.getElementById('modal-image-preview').src = base64String;
+                };
+                reader.readAsDataURL(file);
+            }
         }
 
         function openProductModal(prodId = null) {
@@ -1118,11 +1105,15 @@
                 document.getElementById('modal-price').value = prod.price;
                 document.getElementById('modal-cost').value = prod.cost;
                 document.getElementById('modal-stock').value = prod.stock;
+                document.getElementById('modal-image').value = prod.image || 'logo.png';
+                document.getElementById('modal-image-preview').src = prod.image || 'logo.png';
             } else {
                 title.innerText = 'إضافة صنف جديد';
                 document.getElementById('product-form').reset();
                 document.getElementById('prod-id').value = '';
                 document.getElementById('modal-code').value = (1000 + products.length + 1).toString();
+                document.getElementById('modal-image').value = 'logo.png';
+                document.getElementById('modal-image-preview').src = 'logo.png';
             }
 
             modal.classList.remove('hidden');
@@ -1142,17 +1133,18 @@
             const price = parseFloat(document.getElementById('modal-price').value) || 0;
             const cost = parseFloat(document.getElementById('modal-cost').value) || 0;
             const stock = parseInt(document.getElementById('modal-stock').value) || 0;
+            const image = document.getElementById('modal-image').value.trim() || 'logo.png';
 
             if (id) {
                 const index = products.findIndex(p => p.id == id);
                 if (index !== -1) {
-                    products[index] = { ...products[index], code, barcode, name, category, price, cost, stock };
+                    products[index] = { ...products[index], code, barcode, name, category, price, cost, stock, image };
                     showToast('تم تعديل الصنف بنجاح', 'success');
                 }
             } else {
                 const newProd = {
                     id: Date.now(),
-                    code, barcode, name, category, price, cost, stock
+                    code, barcode, name, category, price, cost, stock, image
                 };
                 products.push(newProd);
                 showToast('تمت إضافة الصنف الجديد بنجاح', 'success');
@@ -1434,7 +1426,7 @@
                 sellerName: "متجر الموقع الإلكتروني",
                 paymentMethod: "دفع إلكتروني",
                 items: [
-                    { id: 1001, name: "شاي العروسة ناعم - 40 جم", category: "شاي ناعم", price: 12, cost: 9.6, quantity: 1 }
+                    { id: 1001, name: "شاي العروسة ناعم - 40 جم", category: "شاي ناعم", price: 12, cost: 9.6, quantity: 1, image: "logo.png" }
                 ],
                 subtotal: 12,
                 discount: 0,
@@ -1493,7 +1485,7 @@
             renderInventoryTable();
             renderPosSearchResults();
 
-            showToast(`تمت الموافقة على الطلب #${orderId} وتحويله إلى فاتورة بيع وخصمه من المخزون بنجاح!`, 'success');
+            showToast(`تمت الموافقة على الطلب #${orderId} وتحويله إلى فاتورة بيع وخصمه من المخزن بنجاح!`, 'success');
         }
 
         function rejectOrder(orderId) {
