@@ -100,7 +100,7 @@
                 </button>
                 <button onclick="switchTab('inventory-sheet')" id="nav-inventory-sheet" class="sidebar-item w-full flex items-center px-6 py-3 text-sm font-semibold">
                     <i class="fa-solid fa-clipboard-check w-6 text-lg text-emerald-400"></i>
-                    <span>جرد شهر يوليو فقط</span>
+                    <span>جرد شهر يوليو </span>
                 </button>
                 <button onclick="switchTab('orders')" id="nav-orders" class="sidebar-item w-full flex items-center justify-between px-6 py-3 text-sm font-semibold">
                     <div class="flex items-center gap-3">
@@ -113,8 +113,8 @@
         </div>
 
         <div class="p-4 border-t border-gray-800 text-center text-xs text-gray-500">
-            نور جروب للمبيعات — مصر[cite: 2]<br>
-            <span class="text-gray-400 font-mono">NOUR GROUP — 2026[cite: 2]</span>
+            نور جروب للمبيعات — مصر<br>
+            <span class="text-gray-400 font-mono">NOUR GROUP — 2026</span>
         </div>
     </aside>
 
@@ -209,7 +209,7 @@
             <div class="flex-1 p-4 sm:p-6 flex flex-col overflow-y-auto">
                 <div class="mb-4">
                     <h2 class="text-xl font-bold text-gray-800 dark:text-white mb-1">نقطة البيع (POS)</h2>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">أضف الأصناف بالفواتير بالبحث أو الكود أو الباركود[cite: 2]</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">أضف الأصناف بالفواتير بالبحث أو الكود أو الباركود</p>
                     <div class="relative mt-3">
                         <input type="text" id="pos-search" oninput="renderPosSearchResults()" placeholder="اكتب الاسم، الكود، أو الباركود واستعرض الأصناف..." class="w-full p-3 pr-10 rounded-xl border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 dark:text-white shadow-sm text-sm">
                         <i class="fa-solid fa-magnifying-glass absolute top-3.5 right-3 text-gray-400"></i>
@@ -260,7 +260,7 @@
                     </div>
                     <div class="flex justify-between text-xs text-gray-600 dark:text-gray-300">
                         <span>الإجمالي قبل الخصم:</span>
-                        <span class="font-bold text-gray-800 dark:text-white" id="cart-subtotal">0.00 ج.م[cite: 2]</span>
+                        <span class="font-bold text-gray-800 dark:text-white" id="cart-subtotal">0.00 ج.م</span>
                     </div>
 
                     <div class="space-y-1">
@@ -268,7 +268,7 @@
                         <div class="flex gap-2">
                             <input type="number" id="cart-discount-input" oninput="calculateCartTotals()" value="0" min="0" class="w-full p-2 text-sm rounded border border-gray-300 dark:border-gray-700 focus:outline-none bg-white dark:bg-gray-800 dark:text-white">
                             <select id="cart-discount-type" onchange="calculateCartTotals()" class="p-2 text-sm rounded border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 dark:text-white">
-                                <option value="fixed">ج.م[cite: 2]</option>
+                                <option value="fixed">ج.م</option>
                                 <option value="percent">%</option>
                             </select>
                         </div>
@@ -341,11 +341,11 @@
             </div>
         </section>
 
-        <!-- قسم خانة الجرد لشهر يوليو فقط -->
+        <!-- قسم خانة الجرد لشهر يوليو -->
         <section id="tab-inventory-sheet" class="hidden p-4 sm:p-6 space-y-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">جرد شهر يوليو فقط</h2>
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">جرد شهر يوليو</h2>
                     <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">إدارة الأعداد واللوكيشنات وحساب النواقص الفورية بالتطابق[cite: 2]</p>
                 </div>
                 <div class="flex gap-2">
@@ -518,11 +518,11 @@
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <div>
-                        <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">السعر (ج.م)[cite: 2]</label>
+                        <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">السعر (ج.م)</label>
                         <input type="number" step="0.01" id="modal-price" required class="w-full p-2 border dark:border-gray-700 rounded text-sm mt-1 bg-white dark:bg-gray-900 dark:text-white">
                     </div>
                     <div>
-                        <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">التكلفة (ج.م)[cite: 2]</label>
+                        <label class="text-xs font-semibold text-gray-600 dark:text-gray-300">التكلفة (ج.م)</label>
                         <input type="number" step="0.01" id="modal-cost" required class="w-full p-2 border dark:border-gray-700 rounded text-sm mt-1 bg-white dark:bg-gray-900 dark:text-white">
                     </div>
                     <div>
