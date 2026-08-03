@@ -293,7 +293,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
                     <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">جرد المخزون الفعلي</h2>
-                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">جميع أصناف الموقع تظهر أدناه، وقم بإدخال الكميات الموجودة فعلياً في خنة الجرد (تلقائياً تبدأ بصفر)</p>
+                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">جميع أصناف الموقع تظهر أدناه، وقم بتعديل الكميات الموجودة فعلياً في حالة وجود نواقص (الخانات تأخذ نفس رصيد النظام كافتراضي لتسهيل الجرد)</p>
                 </div>
                 <button onclick="savePhysicalInventory()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2.5 rounded-lg text-sm flex items-center gap-2 shadow">
                     <i class="fa-solid fa-clipboard-check"></i>
@@ -319,7 +319,7 @@
             <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row gap-3">
                 <input type="text" id="inv-search" oninput="renderInventoryTable()" placeholder="بحث بالاسم أو الكود للجرد..." class="flex-1 p-2.5 border dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-900 dark:text-white">
                 <select id="inv-filter" onchange="renderInventoryTable()" class="p-2.5 border dark:border-gray-700 rounded-lg text-sm bg-white dark:bg-gray-900 dark:text-white">
-                    <option value="all">جميع الأصناف</option>
+                    <option value="all" selected>جميع الأصناف (عرض الكل)</option>
                     <option value="low">المخزون المنخفض فقط</option>
                 </select>
             </div>
@@ -332,7 +332,7 @@
                             <th class="p-3.5">الصنف</th>
                             <th class="p-3.5">الفئة</th>
                             <th class="p-3.5">المخزون بالنظام</th>
-                            <th class="p-3.5 text-blue-600">الأصناف الموجودة (أنت تجردها)</th>
+                            <th class="p-3.5 text-blue-600">الجرد الفعلي (تعديل النواقص)</th>
                             <th class="p-3.5">الفارق</th>
                         </tr>
                     </thead>
@@ -670,7 +670,7 @@
         let cart = [];
         let invoices = [];
         let orders = []; 
-        let physicalCountInputs = {}; // لحفظ ما يكتبه المستخدم في الجرد
+        let physicalCountInputs = {}; 
         let selectedProductToDelete = null;
         let selectedInvoiceToDelete = null;
         let categoryChartInstance = null;
@@ -1095,19 +1095,24 @@
             }
         }
 
-        // دالة تطبيق واعتماد الجرد الفعلي الذي حددته أنت
+        // دالة تطبيق واعتماد الجرد الفعلي
         function savePhysicalInventory() {
             let updatedCount = 0;
             products.forEach(p => {
                 if (physicalCountInputs[p.id] !== undefined) {
+                    // تحديث المخزون فقط إذا تم تعديل الخانة
+                    if (p.stock !== physicalCountInputs[p.id]) {
+                        updatedCount++;
+                    }
                     p.stock = physicalCountInputs[p.id];
-                    updatedCount++;
                 }
             });
             saveProductsToStorage();
+            // تصفير المدخلات المحفوظة حتى يتم سحب المخزون الجديد في المرة القادمة
+            physicalCountInputs = {}; 
             renderInventoryTable();
             renderDashboard();
-            showToast(`تم اعتماد جرد ${updatedCount} صنف وتحديث كميات المخزن بنجاح!`, 'success');
+            showToast(`تم اعتماد وتحديث رصيد ${updatedCount} صنف في المخزن بنجاح!`, 'success');
         }
 
         function renderInventoryTable() {
@@ -1135,21 +1140,21 @@
             }
 
             tbody.innerHTML = filtered.map(p => {
-                // القيمة الافتراضية للجرد تبدأ بـ 0 كما طلبت أو القيمة المحفوظة مؤقتاً
+                // الخانة تبدأ تلقائياً بنفس رصيد المخزون لتسهيل الجرد وتعديل النواقص فقط
                 if (physicalCountInputs[p.id] === undefined) {
-                    physicalCountInputs[p.id] = 0; 
+                    physicalCountInputs[p.id] = p.stock; 
                 }
                 const currentVal = physicalCountInputs[p.id];
                 const diff = currentVal - p.stock;
 
                 return `
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b dark:border-gray-700">
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b dark:border-gray-700 transition-colors">
                         <td class="p-3.5 font-bold text-gray-700 dark:text-gray-300">${p.code}</td>
                         <td class="p-3.5 font-bold text-gray-800 dark:text-white">${p.name}</td>
                         <td class="p-3.5 text-gray-500">${p.category}</td>
                         <td class="p-3.5 font-bold text-gray-600 dark:text-gray-300">${p.stock} قطعة</td>
                         <td class="p-3.5">
-                            <input type="number" min="0" value="${currentVal}" oninput="updatePhysicalCount(${p.id}, this.value)" class="w-28 p-2 border-2 border-blue-400 rounded-lg text-center font-bold text-blue-600 bg-blue-50 dark:bg-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="number" min="0" value="${currentVal}" oninput="updatePhysicalCount(${p.id}, this.value)" class="w-28 p-2 border-2 border-blue-400 rounded-lg text-center font-bold text-blue-600 bg-blue-50 dark:bg-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition">
                         </td>
                         <td id="diff-${p.id}" class="p-3.5 font-bold ${diff === 0 ? 'text-gray-500' : (diff > 0 ? 'text-emerald-600' : 'text-rose-600')}">
                             ${diff > 0 ? '+' + diff : diff} قطعة
