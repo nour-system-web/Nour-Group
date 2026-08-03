@@ -779,13 +779,24 @@
                 saveInventorySheetToStorage();
             }
 
-            // ربط مخزون السيستم في الجرد بمخزون المنتجات الحقيقي الفعلي في النظام
-            inventorySheet.forEach(sheetItem => {
-                const prod = products.find(p => p.code === sheetItem.code);
-                if (prod) {
-                    sheetItem.sysStock = prod.stock;
+            // مزامنة أوتوماتيكية لأي صنف جديد مضاف مسبقاً
+            products.forEach(prod => {
+                const existingSheetItem = inventorySheet.find(si => si.code === prod.code);
+                if (!existingSheetItem) {
+                    inventorySheet.push({
+                        code: prod.code,
+                        barcode: prod.barcode || "",
+                        name: prod.name,
+                        category: prod.category,
+                        sysStock: prod.stock,
+                        actualStock: prod.stock,
+                        location: "kat/stock-line/ZA-NEW"
+                    });
+                } else {
+                    existingSheetItem.sysStock = prod.stock;
                 }
             });
+            saveInventorySheetToStorage();
 
             const savedInvoices = localStorage.getItem('nour_erp_invoices');
             if (savedInvoices) {
@@ -1004,11 +1015,24 @@
             const query = document.getElementById('sheet-search').value.trim().toLowerCase();
             const tbody = document.getElementById('inventory-sheet-tbody');
 
-            // تحديث مخزون السيستم في الجرد ليطابق مخزون المنتجات تماماً
-            inventorySheet.forEach(item => {
-                const prod = products.find(p => p.code === item.code);
-                if (prod) {
-                    item.sysStock = prod.stock;
+            // مزامنة تلقائية لضمان وجود جميع الأصناف المضافة في خانة الأصناف داخل الجرد
+            products.forEach(prod => {
+                let sheetItem = inventorySheet.find(i => i.code === prod.code);
+                if (sheetItem) {
+                    sheetItem.sysStock = prod.stock;
+                    sheetItem.name = prod.name;
+                    sheetItem.category = prod.category;
+                    sheetItem.barcode = prod.barcode;
+                } else {
+                    inventorySheet.push({
+                        code: prod.code,
+                        barcode: prod.barcode || "",
+                        name: prod.name,
+                        category: prod.category,
+                        sysStock: prod.stock,
+                        actualStock: prod.stock,
+                        location: "kat/stock-line/ZA-NEW"
+                    });
                 }
             });
 
@@ -1064,7 +1088,6 @@
             }).join('');
         }
 
-        // تحديث المخزون الفعلي وعرض النواقص فقط دون المساس بمخزون السيستم أو الأصناف
         function updateSheetActual(code, val) {
             const item = inventorySheet.find(i => i.code === code);
             if (item) {
@@ -1268,6 +1291,13 @@
 
             saveProductsToStorage();
 
+            // تحديث مخزون السيستم في الجرد
+            products.forEach(p => {
+                const sheetItem = inventorySheet.find(si => si.code === p.code);
+                if (sheetItem) sheetItem.sysStock = p.stock;
+            });
+            saveInventorySheetToStorage();
+
             const newInvoice = {
                 id: Math.floor(100000 + Math.random() * 900000).toString(),
                 date: new Date().toISOString(),
@@ -1426,16 +1456,7 @@
                     prod.cost = cost;
                     prod.stock = stock;
                 }
-                const sheetItem = inventorySheet.find(si => si.code === code);
-                if (sheetItem) {
-                    sheetItem.name = name;
-                    sheetItem.category = category;
-                    sheetItem.barcode = barcode;
-                    sheetItem.sysStock = stock;
-                } else {
-                    inventorySheet.push({ code, barcode, name, category, sysStock: stock, actualStock: stock, location: "kat/stock-line/ZA-NEW" });
-                }
-                showToast('تم تعديل الصنف ومزامنة مخزون السيستم بنجاح!', 'success');
+                showToast('تم تعديل الصنف بنجاح!', 'success');
             } else {
                 const newProd = {
                     id: Date.now(),
@@ -1448,8 +1469,26 @@
                     stock
                 };
                 products.push(newProd);
-                inventorySheet.push({ code, barcode, name, category, sysStock: stock, actualStock: stock, location: "kat/stock-line/ZA-NEW" });
-                showToast('تمت إضافة الصنف الجديد ومزامنة المخزون بنجاح!', 'success');
+                showToast('تمت إضافة الصنف الجديد بنجاح!', 'success');
+            }
+
+            // مــــزامــــنــــة تلقائية مع جدول الجرد (Inventory Sheet)
+            const sheetItem = inventorySheet.find(si => si.code === code);
+            if (sheetItem) {
+                sheetItem.name = name;
+                sheetItem.category = category;
+                sheetItem.barcode = barcode;
+                sheetItem.sysStock = stock;
+            } else {
+                inventorySheet.push({
+                    code: code,
+                    barcode: barcode,
+                    name: name,
+                    category: category,
+                    sysStock: stock,
+                    actualStock: stock,
+                    location: "kat/stock-line/ZA-NEW"
+                });
             }
 
             saveProductsToStorage();
@@ -1518,60 +1557,108 @@
                             <span class="font-black text-blue-600 dark:text-blue-400">فاتورة #${inv.id}</span>
                             <span class="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded font-semibold">${inv.paymentMethod}</span>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">العميل: <strong class="text-gray-700 dark:text-gray-200">${inv.buyerName}</strong> | البائع: ${inv.sellerName} | التاريخ: ${new Date(inv.date).toLocaleString('ar-EG')}</p>
-                        <p class="text-xs text-gray-400 mt-0.5">الأصناف: ${inv.items.map(it => `${it.name} (${it.quantity})`).join('، ')}</p>
+                        <p class="text-xs text-gray-500 mt-1">العميل: <span class="font-bold text-gray-700 dark:text-gray-200">${inv.buyerName}</span> | الكاشير: ${inv.sellerName}</p>
+                        <p class="text-xs text-gray-400 mt-0.5">${new Date(inv.date).toLocaleString('ar-EG')}</p>
                     </div>
                     <div class="flex items-center gap-4">
                         <div class="text-left">
-                            <p class="text-base font-black text-gray-800 dark:text-white">${inv.finalTotal.toFixed(2)} ج.م</p>
-                            <p class="text-xs text-emerald-600">ربح: ${inv.profit.toFixed(2)} ج.م</p>
+                            <p class="text-sm font-black text-gray-800 dark:text-white">${inv.finalTotal.toFixed(2)} ج.م</p>
+                            <p class="text-xs text-emerald-600 font-bold">ربح: ${inv.profit.toFixed(2)} ج.م</p>
                         </div>
                         <div class="flex gap-1">
-                            <button onclick='openPrintModal(${JSON.stringify(inv)})' class="p-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-xs" title="طباعة"><i class="fa-solid fa-print"></i></button>
-                            <button onclick="openEditInvoiceModal('${inv.id}')" class="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs" title="تعديل"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="openDeleteModal('${inv.id}')" class="p-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-xs" title="حذف وإعادة المخزون"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick='openPrintModal(${JSON.stringify(inv)})' class="p-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 rounded-lg text-xs" title="طباعة أو استعراض"><i class="fa-solid fa-print"></i></button>
+                            <button onclick="openEditInvoiceModal('${inv.id}')" class="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs" title="تعديل بيانات الفاتورة"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="openDeleteModal('${inv.id}')" class="p-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-xs" title="حذف الفاتورة وإعادة المخزون"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        function openPrintModal(inv) {
+        function openPrintModal(invoice) {
+            const modal = document.getElementById('print-modal');
             const container = document.getElementById('printable-invoice');
+
             container.innerHTML = `
-                <div class="text-center pb-3 border-b border-dashed border-gray-300 dark:border-gray-700 space-y-1">
-                    <h2 class="font-black text-base">نور جروب للمبيعات والمخزون</h2>
-                    <p class="text-xs text-gray-500">فاتورة مبيعات رسمية</p>
+                <div class="text-center border-b pb-3 mb-2">
+                    <h3 class="font-black text-base text-gray-800 dark:text-white">Nour Group ERP</h3>
+                    <p class="text-[10px] text-gray-500">نظام المبيعات والمخزون — مصر</p>
+                    <p class="font-bold text-xs mt-1">فاتورة مبيعات رقم #${invoice.id}</p>
                 </div>
-                <div class="py-2 space-y-1 text-xs">
-                    <div class="flex justify-between"><span>رقم الفاتورة:</span><span class="font-bold">#${inv.id}</span></div>
-                    <div class="flex justify-between"><span>التاريخ:</span><span>${new Date(inv.date).toLocaleString('ar-EG')}</span></div>
-                    <div class="flex justify-between"><span>العميل:</span><span class="font-bold">${inv.buyerName}</span></div>
-                    <div class="flex justify-between"><span>الكاشير:</span><span>${inv.sellerName}</span></div>
-                    <div class="flex justify-between"><span>طريقة الدفع:</span><span>${inv.paymentMethod}</span></div>
+                <div class="space-y-1 text-[11px] text-gray-600 dark:text-gray-300 mb-3">
+                    <p><strong>التاريخ:</strong> ${new Date(invoice.date).toLocaleString('ar-EG')}</p>
+                    <p><strong>العميل:</strong> ${invoice.buyerName}</p>
+                    <p><strong>البائع:</strong> ${invoice.sellerName}</p>
+                    <p><strong>طريقة الدفع:</strong> ${invoice.paymentMethod}</p>
                 </div>
-                <div class="border-t border-b border-dashed border-gray-300 dark:border-gray-700 py-2 space-y-2">
-                    ${inv.items.map(i => `
-                        <div class="flex justify-between text-xs">
-                            <span>${i.name} (${i.quantity} × ${i.price.toFixed(2)})</span>
-                            <span class="font-bold">${(i.price * i.quantity).toFixed(2)}</span>
-                        </div>
-                    `).join('')}
+                <table class="w-full text-right text-[11px] mb-3 border-t border-b py-1">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="py-1">الصنف</th>
+                            <th class="py-1 text-center">الكمية</th>
+                            <th class="py-1 text-left">السعر</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        ${invoice.items.map(i => `
+                            <tr>
+                                <td class="py-1 line-clamp-1">${i.name}</td>
+                                <td class="py-1 text-center">${i.quantity}</td>
+                                <td class="py-1 text-left">${(i.price * i.quantity).toFixed(2)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <div class="space-y-1 text-[11px] border-t pt-2">
+                    <div class="flex justify-between"><span>الإجمالي الفرعي:</span><span>${invoice.subtotal.toFixed(2)} ج.م</span></div>
+                    ${invoice.discount > 0 ? `<div class="flex justify-between text-rose-500"><span>الخصم:</span><span>-${invoice.discount.toFixed(2)} ج.م</span></div>` : ''}
+                    <div class="flex justify-between font-black text-sm text-blue-600 pt-1 border-t"><span>الإجمالي النهائي:</span><span>${invoice.finalTotal.toFixed(2)} ج.م</span></div>
                 </div>
-                <div class="pt-2 space-y-1 text-xs font-bold">
-                    <div class="flex justify-between"><span>الإجمالي الفرعي:</span><span>${inv.subtotal.toFixed(2)} ج.م</span></div>
-                    ${inv.discount > 0 ? `<div class="flex justify-between text-amber-600"><span>الخصم:</span><span>-${inv.discount.toFixed(2)} ج.م</span></div>` : ''}
-                    <div class="flex justify-between text-sm text-blue-600 pt-1 border-t border-gray-200 dark:border-gray-700"><span>الإجمالي النهائي:</span><span>${inv.finalTotal.toFixed(2)} ج.م</span></div>
-                </div>
-                <div class="text-center pt-3 border-t border-dashed border-gray-300 dark:border-gray-700 text-[10px] text-gray-400">
-                    شكراً لتعاملكم مع نور جروب — تسرنا خدمتكم دائماً
+                <div class="text-center text-[10px] text-gray-400 mt-4 pt-2 border-t">
+                    شكراً لتعاملكم معنا — نور جروب 2026
                 </div>
             `;
-            document.getElementById('print-modal').classList.remove('hidden');
+
+            modal.classList.remove('hidden');
         }
 
         function closePrintModal() {
             document.getElementById('print-modal').classList.add('hidden');
+        }
+
+        function openEditInvoiceModal(invId) {
+            const inv = invoices.find(i => i.id === invId);
+            if (!inv) return;
+
+            document.getElementById('edit-inv-id').value = inv.id;
+            document.getElementById('edit-inv-id-display').innerText = '#' + inv.id;
+            document.getElementById('edit-inv-buyer').value = inv.buyerName || '';
+            document.getElementById('edit-inv-seller').value = inv.sellerName || '';
+            document.getElementById('edit-inv-payment').value = inv.paymentMethod || 'نقداً (كاش)';
+
+            document.getElementById('edit-invoice-modal').classList.remove('hidden');
+        }
+
+        function closeEditInvoiceModal() {
+            document.getElementById('edit-invoice-modal').classList.add('hidden');
+        }
+
+        function saveInvoiceEdits(e) {
+            e.preventDefault();
+            const invId = document.getElementById('edit-inv-id').value;
+            const inv = invoices.find(i => i.id === invId);
+
+            if (inv) {
+                inv.buyerName = document.getElementById('edit-inv-buyer').value.trim();
+                inv.sellerName = document.getElementById('edit-inv-seller').value.trim();
+                inv.paymentMethod = document.getElementById('edit-inv-payment').value;
+
+                saveInvoicesToStorage();
+                closeEditInvoiceModal();
+                renderInvoicesList();
+                renderDashboard();
+                showToast('تم تعديل بيانات الفاتورة بنجاح!', 'success');
+            }
         }
 
         function openDeleteModal(invId) {
@@ -1588,61 +1675,33 @@
                         prod.stock += item.quantity;
                     }
                 });
+
+                // تحديث مخزون السيستم في الجرد بعد استرداد كميات الفاتورة المحذوفة
+                products.forEach(p => {
+                    const sheetItem = inventorySheet.find(si => si.code === p.code);
+                    if (sheetItem) sheetItem.sysStock = p.stock;
+                });
+
                 saveProductsToStorage();
+                saveInventorySheetToStorage();
 
                 invoices = invoices.filter(i => i.id !== inv.id);
                 saveInvoicesToStorage();
 
                 closeDeleteModal();
                 renderInvoicesList();
+                renderDashboard();
                 renderInventoryTable();
                 renderInventorySheetTable();
                 renderProductsTable();
-                renderDashboard();
-                showToast('تم حذف الفاتورة وإعادة الأصناف للمخزون بنجاح', 'success');
+                renderPosSearchResults();
+                showToast('تم حذف الفاتورة واسترداد المخزون بنجاح', 'success');
             }
         }
 
         function closeDeleteModal() {
             document.getElementById('delete-modal').classList.add('hidden');
             selectedInvoiceToDelete = null;
-        }
-
-        function openEditInvoiceModal(invId) {
-            const inv = invoices.find(i => i.id === invId);
-            if (!inv) return;
-
-            document.getElementById('edit-inv-id').value = inv.id;
-            document.getElementById('edit-inv-id-display.innerText') = '#' + inv.id;
-            document.getElementById('edit-inv-buyer').value = inv.buyerName;
-            document.getElementById('edit-inv-seller').value = inv.sellerName;
-            document.getElementById('edit-inv-payment').value = inv.paymentMethod;
-
-            document.getElementById('edit-invoice-modal').classList.remove('hidden');
-        }
-
-        function closeEditInvoiceModal() {
-            document.getElementById('edit-invoice-modal').classList.add('hidden');
-        }
-
-        function saveInvoiceEdits(e) {
-            e.preventDefault();
-            const invId = document.getElementById('edit-inv-id').value;
-            const buyer = document.getElementById('edit-inv-buyer').value.trim();
-            const seller = document.getElementById('edit-inv-seller').value.trim();
-            const payment = document.getElementById('edit-inv-payment').value;
-
-            const inv = invoices.find(i => i.id === invId);
-            if (inv) {
-                inv.buyerName = buyer;
-                inv.sellerName = seller;
-                inv.paymentMethod = payment;
-                saveInvoicesToStorage();
-                showToast('تم تعديل بيانات الفاتورة بنجاح', 'success');
-                closeEditInvoiceModal();
-                renderInvoicesList();
-                renderDashboard();
-            }
         }
 
         function renderOrdersList() {
@@ -1656,24 +1715,28 @@
                 return;
             }
 
-            container.innerHTML = orders.map(order => `
+            container.innerHTML = orders.map(ord => `
                 <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
                         <div class="flex items-center gap-2">
-                            <span class="font-black text-purple-600 dark:text-purple-400">طلب موقع #${order.id}</span>
-                            <span class="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded font-bold">معلق للمراجعة</span>
+                            <span class="font-black text-rose-600">طلب موقع #${ord.id}</span>
+                            <span class="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded font-semibold">${ord.paymentMethod}</span>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">العميل: <strong class="text-gray-700 dark:text-gray-200">${order.buyerName}</strong> | طريقة الدفع: ${order.paymentMethod} | التاريخ: ${new Date(order.date).toLocaleString('ar-EG')}</p>
-                        <p class="text-xs text-gray-400 mt-0.5">الأصناف المطلوبة: ${order.items.map(it => `${it.name} (${it.quantity})`).join('، ')}</p>
+                        <p class="text-xs text-gray-600 dark:text-gray-300 mt-1">العميل: <strong class="text-gray-800 dark:text-white">${ord.buyerName}</strong></p>
+                        <div class="text-xs text-gray-500 mt-1">
+                            الأصناف: ${ord.items.map(it => `${it.name} (${it.quantity} قطعة)`).join('، ')}
+                        </div>
                     </div>
-                    <div class="flex items-center gap-4">
-                        <span class="text-base font-black text-gray-800 dark:text-white">${order.finalTotal.toFixed(2)} ج.م</span>
-                        <div class="flex gap-2">
-                            <button onclick="approveOrder('${order.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow">
-                                <i class="fa-solid fa-check"></i> موافقة وتحويل لفاتورة
+                    <div class="flex items-center gap-3">
+                        <div class="text-left">
+                            <span class="font-black text-sm text-gray-800 dark:text-white">${ord.finalTotal.toFixed(2)} ج.م</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <button onclick="approveOrder('${ord.id}')" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow">
+                                <i class="fa-solid fa-check"></i> قبول وإصدار فاتورة
                             </button>
-                            <button onclick="rejectOrder('${order.id}')" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold flex items-center gap-1 shadow">
-                                <i class="fa-solid xmark"></i> رفض
+                            <button onclick="rejectOrder('${ord.id}')" class="px-3 py-2 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded-lg text-xs font-bold">
+                                رفض
                             </button>
                         </div>
                     </div>
@@ -1682,43 +1745,36 @@
         }
 
         function simulateIncomingOrder() {
-            const newOrderId = Math.floor(9000 + Math.random() * 900).toString();
-            const sampleOrder = {
-                id: newOrderId,
+            const randomId = Math.floor(8000 + Math.random() * 1000).toString();
+            const randomProd = products[Math.floor(Math.random() * products.length)] || products[0];
+            
+            const newOrder = {
+                id: randomId,
                 date: new Date().toISOString(),
                 buyerName: "عميل إلكتروني جديد",
-                sellerName: "الموقع الإلكتروني",
+                sellerName: "أونلاين",
                 paymentMethod: "نقداً (كاش)",
                 items: [
-                    { id: products[0].id, name: products[0].name, category: products[0].category, price: products[0].price, cost: products[0].cost, quantity: 1 }
+                    { id: randomProd.id, name: randomProd.name, category: randomProd.category, price: randomProd.price, cost: randomProd.cost, quantity: 1 }
                 ],
-                subtotal: products[0].price,
+                subtotal: randomProd.price,
                 discount: 0,
-                finalTotal: products[0].price,
-                profit: products[0].price - products[0].cost
+                finalTotal: randomProd.price,
+                profit: randomProd.price - randomProd.cost
             };
-            orders.push(sampleOrder);
+
+            orders.push(newOrder);
             saveOrdersToStorage();
             renderOrdersList();
-            showToast('تم استلام طلب جديد من الموقع الإلكتروني بنجاح!', 'info');
+            showToast('تم استقبال طلب جديد من الموقع الإلكتروني بنجاح!', 'info');
         }
 
-        function approveOrder(orderId) {
-            const orderIndex = orders.findIndex(o => o.id === orderId);
-            if (orderIndex === -1) return;
-            const order = orders[orderIndex];
+        function approveOrder(ordId) {
+            const ord = orders.find(o => o.id === ordId);
+            if (!ord) return;
 
-            // التحقق من توفر المخزون
-            for (let item of order.items) {
-                const prod = products.find(p => p.id === item.id);
-                if (!prod || prod.stock < item.quantity) {
-                    showToast(`عذراً، الصنف (${item.name}) غير متوفر بالكمية المطلوبة في المخزن!`, 'error');
-                    return;
-                }
-            }
-
-            // خصم المخزون
-            order.items.forEach(item => {
+            // خصم الكميات من المخزون
+            ord.items.forEach(item => {
                 const prod = products.find(p => p.id === item.id);
                 if (prod) {
                     prod.stock = Math.max(0, prod.stock - item.quantity);
@@ -1726,40 +1782,49 @@
             });
             saveProductsToStorage();
 
-            // تحويل الطلب لفاتورة رسمية
-            invoices.push({
-                id: order.id,
-                date: order.date,
-                buyerName: order.buyerName,
-                sellerName: order.sellerName,
-                paymentMethod: order.paymentMethod,
-                items: order.items,
-                subtotal: order.subtotal,
-                discount: order.discount,
-                finalTotal: order.finalTotal,
-                profit: order.profit
+            // تحديث مخزون السيستم في الجرد
+            products.forEach(p => {
+                const sheetItem = inventorySheet.find(si => si.code === p.code);
+                if (sheetItem) sheetItem.sysStock = p.stock;
             });
+            saveInventorySheetToStorage();
+
+            // تحويل الطلب إلى فاتورة مبيعات معتمدة
+            const newInvoice = {
+                id: Math.floor(100000 + Math.random() * 900000).toString(),
+                date: new Date().toISOString(),
+                buyerName: ord.buyerName,
+                sellerName: "أحمد نور (أونلاين)",
+                paymentMethod: ord.paymentMethod,
+                items: ord.items,
+                subtotal: ord.subtotal,
+                discount: ord.discount,
+                finalTotal: ord.finalTotal,
+                profit: ord.profit
+            };
+
+            invoices.push(newInvoice);
             saveInvoicesToStorage();
 
-            // إزالة الطلب من المعلقات
-            orders.splice(orderIndex, 1);
+            // حذف الطلب من القائمة المعلقة
+            orders = orders.filter(o => o.id !== ordId);
             saveOrdersToStorage();
 
             renderOrdersList();
-            renderInvoicesList();
+            renderDashboard();
             renderInventoryTable();
             renderInventorySheetTable();
             renderProductsTable();
-            renderDashboard();
+            renderPosSearchResults();
 
-            showToast(`تمت الموافقة على الطلب #${orderId} وتحويله لفاتورة مبيعات بنجاح!`, 'success');
+            showToast(`تم قبول الطلب وتحويله للفاتورة رقم #${newInvoice.id} بنجاح!`, 'success');
         }
 
-        function rejectOrder(orderId) {
-            orders = orders.filter(o => o.id !== orderId);
+        function rejectOrder(ordId) {
+            orders = orders.filter(o => o.id !== ordId);
             saveOrdersToStorage();
             renderOrdersList();
-            showToast('تم رفض وحذف الطلب بنجاح', 'info');
+            showToast('تم رفض الطلب وحذفه', 'info');
         }
     </script>
 </body>
