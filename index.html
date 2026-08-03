@@ -46,7 +46,6 @@
                         <i class="fa-solid fa-lock absolute top-3.5 right-3 text-gray-400"></i>
                     </div>
                 </div>
-                <!-- الرسالة في نص الشاشة (أو تحت الحقل بوضوح) عند خطأ كلمة المرور بناءً على طلبك -->
                 <div id="login-error" class="text-rose-500 text-sm font-bold text-center hidden bg-rose-50 dark:bg-rose-900/30 p-3 rounded-xl border border-rose-200 dark:border-rose-800">
                     كلمة المرور خطأ، حاول مرة أخرى.
                 </div>
@@ -99,9 +98,10 @@
                     <i class="fa-solid fa-file-invoice-dollar w-6 text-lg"></i>
                     <span>الفواتير والأرباح</span>
                 </button>
+                <!-- تم التعديل هنا ليصبح الاسم: جرد شهر يوليو فقط -->
                 <button onclick="switchTab('inventory-sheet')" id="nav-inventory-sheet" class="sidebar-item w-full flex items-center px-6 py-3 text-sm font-semibold">
                     <i class="fa-solid fa-clipboard-check w-6 text-lg text-emerald-400"></i>
-                    <span>خانة الجرد (يوليو)[cite: 2]</span>
+                    <span>جرد شهر يوليو فقط</span>
                 </button>
                 <button onclick="switchTab('orders')" id="nav-orders" class="sidebar-item w-full flex items-center justify-between px-6 py-3 text-sm font-semibold">
                     <div class="flex items-center gap-3">
@@ -342,11 +342,12 @@
             </div>
         </section>
 
-        <!-- قسم خانة الجرد لشهر يوليو -->
+        <!-- قسم خانة الجرد لشهر يوليو فقط -->
         <section id="tab-inventory-sheet" class="hidden p-4 sm:p-6 space-y-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
-                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">خانة الجرد — شهر يوليو[cite: 2]</h2>
+                    <!-- تم التعديل هنا ليصبح العنوان: جرد شهر يوليو فقط -->
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">جرد شهر يوليو فقط</h2>
                     <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">إدارة الأعداد واللوكيشنات وحساب النواقص الفورية بالتطابق[cite: 2]</p>
                 </div>
                 <div class="flex gap-2">
@@ -661,69 +662,6 @@
             renderOrdersList();
         });
 
-        const defaultProducts = [
-            { id: 1001, code: "1001", barcode: "6222002300016", name: "شاي العروسة ناعم - 40 جم", category: "شاي ناعم", price: 12, cost: 9.6, stock: 2 },
-            { id: 1002, code: "1002", barcode: "6222002300023", name: "شاي العروسة ناعم - 100 جم", category: "شاي ناعم", price: 28, cost: 22.4, stock: 88 },
-            { id: 1003, code: "1003", barcode: "6222002300030", name: "شاي العروسة ناعم - 250 جم", category: "شاي ناعم", price: 65, cost: 52, stock: 34 },
-            { id: 1004, code: "1004", barcode: "6222002300122", name: "شاي العروسة فتلة - 25 فتلة", category: "شاي فتلة", price: 22, cost: 17.6, stock: 22 },
-            { id: 1005, code: "1005", barcode: "6222002300153", name: "شاي العروسة فتلة - 100 فتلة", category: "شاي فتلة", price: 75, cost: 60, stock: 15 },
-            { id: 1006, code: "1006", barcode: "6221048700415", name: "شاي ليبتون أسود ناعم - 40 جم", category: "شاي ناعم", price: 15, cost: 12, stock: 48 },
-            { id: 1007, code: "1007", barcode: "6221048700439", name: "شاي ليبتون أسود ناعم - 100 جم", category: "شاي ناعم", price: 35, cost: 28, stock: 53 },
-            { id: 1008, code: "1008", barcode: "5063305009548", name: "شاي ليبتون أسود ناعم - 250 جم", category: "شاي ناعم", price: 80, cost: 64, stock: 30 },
-            { id: 1009, code: "1009", barcode: "6221048700118", name: "شاي ليبتون فتلة - 25 فتلة", category: "شاي فتلة", price: 28, cost: 22.4, stock: 65 },
-            { id: 1010, code: "1010", barcode: "6221048700736", name: "شاي ليبتون فتلة - 100 فتلة", category: "شاي فتلة", price: 95, cost: 76, stock: 33 },
-            { id: 1011, code: "1011", barcode: "6221048701108", name: "شاي ليبتون أخضر فتلة - 25 فتلة", category: "شاي أخضر", price: 32, cost: 25.6, stock: 20 },
-            { id: 1012, code: "1012", barcode: "6223006100125", name: "شاي أحمد تي أسود (أوراق كاملة) - 100 جم", category: "شاي فاخر", price: 65, cost: 52, stock: 100 },
-            { id: 1013, code: "1013", barcode: "6223006100156", name: "شاي أحمد تي إيرل جراي - 100 جم", category: "شاي فاخر", price: 70, cost: 56, stock: 85 },
-            { id: 1014, code: "1014", barcode: "6223006100224", name: "شاي أحمد تي أخضر فتلة - 25 فتلة", category: "شاي أخضر", price: 45, cost: 36, stock: 12 },
-            { id: 1015, code: "1015", barcode: "6224001200119", name: "شاي الربيع إكسبريس فتلة - 100 فتلة", category: "شاي فتلة", price: 85, cost: 68, stock: 14 },
-            { id: 1016, code: "1016", barcode: "6224001200140", name: "شاي الربيع أوراق كاملة - 200 جم", category: "شاي فاخر", price: 90, cost: 72, stock: 57 },
-            { id: 1017, code: "1017", barcode: "6224001200256", name: "شاي الربيع أوراق بالنعناع - 300 جم", category: "شاي بالنعناع", price: 105, cost: 84, stock: 70 },
-            { id: 1018, code: "1018", barcode: "6224001200287", name: "شاي الربيع أوراق الجوافة - 100 جم", category: "شاي ناعم", price: 200, cost: 160, stock: 40 },
-            { id: 1019, code: "1019", barcode: "6221000001001", name: "شيبسي - طماطم", category: "عائلي", price: 10, cost: 8, stock: 30 },
-            { id: 1020, code: "1020", barcode: "6221000001002", name: "شيبسي - جبنة متبلة", category: "عائلي", price: 10, cost: 8, stock: 40 },
-            { id: 1021, code: "1021", barcode: "6221000001003", name: "شيبسي - شطة وليمون", category: "عائلي", price: 10, cost: 8, stock: 8 },
-            { id: 1022, code: "1022", barcode: "6221000001004", name: "شيبسي - ملح", category: "وسط", price: 5, cost: 4, stock: 84 },
-            { id: 1023, code: "1023", barcode: "6221000001005", name: "شيبسي - كباب", category: "وسط", price: 5, cost: 4, stock: 250 },
-            { id: 1024, code: "1024", barcode: "6221000001006", name: "تايجر - جبنة", category: "كبير", price: 7, cost: 5.6, stock: 221 },
-            { id: 1025, code: "1025", barcode: "6221000001007", name: "تايجر - شطة وليمون", category: "كبير", price: 7, cost: 5.6, stock: 33 },
-            { id: 1026, code: "1026", barcode: "6221000001008", name: "تايجر - طماطم", category: "صغير", price: 3, cost: 2.4, stock: 445 },
-            { id: 1027, code: "1027", barcode: "6221000001009", name: "لايز - ملح كلاسيك", category: "عائلي", price: 15, cost: 12, stock: 14 },
-            { id: 1028, code: "1028", barcode: "6221000001010", name: "لايز - خل وملح", category: "عائلي", price: 15, cost: 12, stock: 221 },
-            { id: 1029, code: "1029", barcode: "6221000001011", name: "دوريتوس - جبنة ناتشو", category: "كبير", price: 10, cost: 8, stock: 99 },
-            { id: 1030, code: "1030", barcode: "6221000001012", name: "دوريتوس - فلفل حلو", category: "كبير", price: 10, cost: 8, stock: 100 },
-            { id: 1031, code: "1031", barcode: "6221000001013", name: "دوريتوس - حار نار", category: "وسط", price: 5, cost: 4, stock: 883 },
-            { id: 1032, code: "1032", barcode: "6221000001014", name: "شيتوس - كرنشي جبنة", category: "كبير", price: 8, cost: 6.4, stock: 337 },
-            { id: 1033, code: "1033", barcode: "6221000001015", name: "شيتوس - حار نار", category: "كبير", price: 8, cost: 6.4, stock: 60 },
-            { id: 1034, code: "1034", barcode: "6221000001016", name: "بيك رولز - بيتزا", category: "وسط", price: 7, cost: 5.6, stock: 255 },
-            { id: 1035, code: "1035", barcode: "6221000001017", name: "بيك رولز - كاتشب", category: "وسط", price: 7, cost: 5.6, stock: 554 },
-            { id: 1036, code: "1036", barcode: "6221000001018", name: "فوكس - جبنة فرنسية", category: "وسط", price: 4, cost: 3.2, stock: 228 },
-            { id: 1037, code: "1037", barcode: "6221000001019", name: "فوكس - طماطم", category: "وسط", price: 4, cost: 3.2, stock: 111 },
-            { id: 1038, code: "1038", barcode: "6221000001020", name: "ويندوز - جبنة", category: "صغير", price: 10, cost: 8, stock: 333 },
-            { id: 1039, code: "1039", barcode: "6222001010013", name: "وفير سائل غسيل أطباق بالليمون - 1 لتر", category: "منظف أواني", price: 65, cost: 52, stock: 889 },
-            { id: 1040, code: "1040", barcode: "6222001010030", name: "بريل سائل غسيل أواني مركز - 1 لتر", category: "منظف أواني", price: 22, cost: 17.6, stock: 677 },
-            { id: 1041, code: "1041", barcode: "6222001010037", name: "بريل سائل غسيل أواني - 600 مل", category: "منظف أواني", price: 38, cost: 30.4, stock: 223 },
-            { id: 1042, code: "1042", barcode: "6222001010044", name: "فيرا سائل غسيل أواني بالليمون - 2.5 لتر", category: "منظف أواني", price: 25, cost: 20, stock: 558 },
-            { id: 1043, code: "1043", barcode: "6222001010051", name: "فيري سائل غسيل أطباق للأيد الحساسة - 650 مل", category: "منظف أواني", price: 45, cost: 36, stock: 44 },
-            { id: 1044, code: "1044", barcode: "6222001010068", name: "أريال أوتوماتيك بودرة بالافندر - 4 كجم", category: "مسحوق غسيل", price: 200, cost: 160, stock: 33 },
-            { id: 1045, code: "1045", barcode: "6222002020012", name: "أريال أوتوماتيك جيل للغسالات - 2.5 لتر", category: "مسحوق غسيل", price: 240, cost: 192, stock: 99 },
-            { id: 1046, code: "1046", barcode: "6222002020029", name: "تايد أوتوماتيك بودرة للغسالات - 5 كجم", category: "مسحوق غسيل", price: 185, cost: 148, stock: 200 },
-            { id: 1047, code: "1047", barcode: "6222002020036", name: "تايد أوتوماتيك جيل بالياسمين - 2.5 لتر", category: "مسحوق غسيل", price: 220, cost: 176, stock: 70 },
-            { id: 1048, code: "1048", barcode: "6222002020043", name: "أوكسي أوتوماتيك بودرة بالافندر - 4.25 كجم", category: "مسحوق غسيل", price: 160, cost: 128, stock: 116 },
-            { id: 1049, code: "1049", barcode: "6222002020060", name: "أوكسي يدوي/عادي بودرة - 1 كجم", category: "مسحوق غسيل", price: 195, cost: 156, stock: 336 },
-            { id: 1050, code: "1050", barcode: "6222002020067", name: "برسيل أوتوماتيك بودرة - 5 كجم", category: "مسحوق غسيل", price: 38, cost: 30.4, stock: 390 },
-            { id: 1051, code: "1051", barcode: "6222002020074", name: "برسيل جيل أوتوماتيك برائحة النظافة - 3.9 لتر", category: "مسحوق غسيل", price: 230, cost: 184, stock: 229 },
-            { id: 1052, code: "1052", barcode: "6222002020081", name: "برسيل أسود (بلاك) للعبايات والملابس الداكنة - 2.5 لتر", category: "مسحوق غسيل", price: 180, cost: 144, stock: 150 },
-            { id: 1053, code: "1053", barcode: "6222004040041", name: "كلوركس ألوان للملابس الملونة - 1 لتر", category: "مطهرات وبياض", price: 22, cost: 17.6, stock: 100 },
-            { id: 1054, code: "1054", barcode: "6222004040058", name: "كلوركس 5 في 1 منظف أرضيات برائحة الصنوبر - 1.5 لتر", category: "العناية بالملابس", price: 35, cost: 28, stock: 203 },
-            { id: 1055, code: "1055", barcode: "6222004040065", name: "جلانس منظف وملمع زجاج - 600 مل (بخاخ)", category: "منظف أرضيات", price: 48, cost: 38.4, stock: 224 },
-            { id: 1056, code: "1056", barcode: "6222005050019", name: "سيـف (Cif) كريم منظف أسطح ودهون - 500 مل", category: "ملمع زجاج", price: 28, cost: 22.4, stock: 299 },
-            { id: 1057, code: "1057", barcode: "6222005050026", name: "ستريس مزيل دهون المطبخ والبوتجاز - 700 مل", category: "مذيب دهون", price: 55, cost: 44, stock: 500 },
-            { id: 1058, code: "1058", barcode: "6222005050033", name: "هاربيك منظف ومطهر التواليت - 700 مل", category: "مذيب دهون", price: 60, cost: 48, stock: 699 },
-            { id: 1059, code: "1059", barcode: "2999019331", name: "بيج شيبسي ١٠٠جم", category: "شيبسي صغير", price: 10, cost: 7, stock: 100 },
-            { id: 1060, code: "1060", barcode: "6222002300099", name: "كيس رز 1 كيلو", category: "رز الضحي", price: 30, cost: 22, stock: 100 },
-        ];
-
         const defaultInventorySheet = [
             { code: "1001", barcode: "6222002300016", name: "شاي العروسة ناعم - 40 جم", category: "شاي ناعم", sysStock: 2, actualStock: 1, location: "kat/stock-line/ZA-01-A01" },
             { code: "1002", barcode: "6222002300023", name: "شاي العروسة ناعم - 100 جم", category: "شاي ناعم", sysStock: 88, actualStock: 77, location: "kat/stock-line/ZA-01-A02" },
@@ -828,14 +766,7 @@
         }
 
         function initStorage() {
-            const savedProducts = localStorage.getItem('nour_erp_products');
-            if (savedProducts) {
-                products = JSON.parse(savedProducts);
-            } else {
-                products = [...defaultProducts];
-                saveProductsToStorage();
-            }
-
+            // تحميل خانة الجرد أولاً لتوليد مصفوفة الأصناف بناءً على المخزون الفعلي للجرد
             const savedSheet = localStorage.getItem('nour_erp_inventory_sheet');
             if (savedSheet) {
                 inventorySheet = JSON.parse(savedSheet);
@@ -843,6 +774,9 @@
                 inventorySheet = JSON.parse(JSON.stringify(defaultInventorySheet));
                 saveInventorySheetToStorage();
             }
+
+            // مزامنة الأصناف وتوليدها بناءً على الأعداد الفعلية المتاحة في الجرد تماماً
+            syncProductsWithInventorySheet();
 
             const savedInvoices = localStorage.getItem('nour_erp_invoices');
             if (savedInvoices) {
@@ -874,6 +808,48 @@
                 ];
                 saveOrdersToStorage();
             }
+        }
+
+        // دالة لمزامنة وتحديث عدد قطع الأصناف لتطابق المخزون الفعلي في الجرد
+        function syncProductsWithInventorySheet() {
+            // الأسعار الافتراضية والتكاليف لكل صنف بناءً على كوده
+            const basePrices = {
+                "1001": { price: 12, cost: 9.6 }, "1002": { price: 28, cost: 22.4 }, "1003": { price: 65, cost: 52 },
+                "1004": { price: 22, cost: 17.6 }, "1005": { price: 75, cost: 60 }, "1006": { price: 15, cost: 12 },
+                "1007": { price: 35, cost: 28 }, "1008": { price: 80, cost: 64 }, "1009": { price: 28, cost: 22.4 },
+                "1010": { price: 95, cost: 76 }, "1011": { price: 32, cost: 25.6 }, "1012": { price: 65, cost: 52 },
+                "1013": { price: 70, cost: 56 }, "1014": { price: 45, cost: 36 }, "1015": { price: 85, cost: 68 },
+                "1016": { price: 90, cost: 72 }, "1017": { price: 105, cost: 84 }, "1018": { price: 200, cost: 160 },
+                "1019": { price: 10, cost: 8 }, "1020": { price: 10, cost: 8 }, "1021": { price: 10, cost: 8 },
+                "1022": { price: 5, cost: 4 }, "1023": { price: 5, cost: 4 }, "1024": { price: 7, cost: 5.6 },
+                "1025": { price: 7, cost: 5.6 }, "1026": { price: 3, cost: 2.4 }, "1027": { price: 15, cost: 12 },
+                "1028": { price: 15, cost: 12 }, "1029": { price: 10, cost: 8 }, "1030": { price: 10, cost: 8 },
+                "1031": { price: 5, cost: 4 }, "1032": { price: 8, cost: 6.4 }, "1033": { price: 8, cost: 6.4 },
+                "1034": { price: 7, cost: 5.6 }, "1035": { price: 7, cost: 5.6 }, "1036": { price: 4, cost: 3.2 },
+                "1037": { price: 4, cost: 3.2 }, "1038": { price: 10, cost: 8 }, "1039": { price: 65, cost: 52 },
+                "1040": { price: 22, cost: 17.6 }, "1041": { price: 38, cost: 30.4 }, "1042": { price: 25, cost: 20 },
+                "1043": { price: 45, cost: 36 }, "1044": { price: 200, cost: 160 }, "1045": { price: 240, cost: 192 },
+                "1046": { price: 185, cost: 148 }, "1047": { price: 220, cost: 176 }, "1048": { price: 160, cost: 128 },
+                "1049": { price: 195, cost: 156 }, "1050": { price: 38, cost: 30.4 }, "1051": { price: 230, cost: 184 },
+                "1052": { price: 180, cost: 144 }, "1053": { price: 22, cost: 17.6 }, "1054": { price: 35, cost: 28 },
+                "1055": { price: 48, cost: 38.4 }, "1056": { price: 28, cost: 22.4 }, "1057": { price: 55, cost: 44 },
+                "1058": { price: 60, cost: 48 }, "1059": { price: 10, cost: 7 }, "1060": { price: 30, cost: 22 }
+            };
+
+            products = inventorySheet.map((sheetItem, index) => {
+                const pricing = basePrices[sheetItem.code] || { price: 10, cost: 8 };
+                return {
+                    id: 1001 + index,
+                    code: sheetItem.code,
+                    barcode: sheetItem.barcode || "",
+                    name: sheetItem.name,
+                    category: sheetItem.category,
+                    price: pricing.price,
+                    cost: pricing.cost,
+                    stock: parseInt(sheetItem.actualStock) || 0 // تعيين عدد القطع ليطابق المخزون الفعلي للجرد تماماً
+                };
+            });
+            saveProductsToStorage();
         }
 
         function saveProductsToStorage() {
@@ -1077,6 +1053,8 @@
             const item = inventorySheet.find(i => i.code === code);
             if (item) {
                 item.actualStock = parseInt(val) || 0;
+                // تحديث مباشر لأعداد القطع في الأصناف لتتطابق تماماً مع الفعلي الجديد
+                syncProductsWithInventorySheet();
                 renderInventorySheetTable();
             }
         }
@@ -1090,13 +1068,15 @@
 
         function saveInventorySheetChanges() {
             saveInventorySheetToStorage();
-            showToast('تم حفظ تعديلات خانة الجرد واللوكيشنات بنجاح!', 'success');
+            syncProductsWithInventorySheet();
+            showToast('تم حفظ تعديلات خانة الجرد ومزامنة أعداد القطع في الأصناف بنجاح!', 'success');
             renderInventorySheetTable();
         }
 
         function resetInventorySheetData() {
             inventorySheet = JSON.parse(JSON.stringify(defaultInventorySheet));
             saveInventorySheetToStorage();
+            syncProductsWithInventorySheet();
             renderInventorySheetTable();
             showToast('تمت استعادة بيانات خانة الجرد الافتراضية بنجاح!', 'info');
         }
@@ -1250,23 +1230,31 @@
 
             const subtotal = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
             const totalCost = cart.reduce((sum, i) => sum + (i.cost * i.quantity), 0);
+
             const discountInput = parseFloat(document.getElementById('cart-discount-input').value) || 0;
             const discountType = document.getElementById('cart-discount-type').value;
-
             let discountVal = discountType === 'percent' ? (subtotal * discountInput) / 100 : discountInput;
+
             const finalTotal = Math.max(0, subtotal - discountVal);
             const profit = Math.max(0, (subtotal - totalCost) - discountVal);
 
-            for (const item of cart) {
-                const prod = products.find(p => p.id === item.id);
+            // خصم الكميات من المخزون ومن خانة الجرد الفعلي
+            cart.forEach(cartItem => {
+                const prod = products.find(p => p.id === cartItem.id);
                 if (prod) {
-                    prod.stock -= item.quantity;
+                    prod.stock = Math.max(0, prod.stock - cartItem.quantity);
                 }
-            }
+                const sheetItem = inventorySheet.find(si => si.code === cartItem.code);
+                if (sheetItem) {
+                    sheetItem.actualStock = Math.max(0, parseInt(sheetItem.actualStock) - cartItem.quantity);
+                }
+            });
 
-            const invoiceId = Math.floor(100000 + Math.random() * 900000).toString();
+            saveProductsToStorage();
+            saveInventorySheetToStorage();
+
             const newInvoice = {
-                id: invoiceId,
+                id: Math.floor(100000 + Math.random() * 900000).toString(),
                 date: new Date().toISOString(),
                 buyerName,
                 sellerName,
@@ -1280,65 +1268,18 @@
 
             invoices.push(newInvoice);
             saveInvoicesToStorage();
-            saveProductsToStorage();
 
-            showPrintModal(newInvoice);
+            showToast(`تم إتمام الفاتورة رقم #${newInvoice.id} بنجاح!`, 'success');
+            openPrintModal(newInvoice);
+
             clearCart();
             document.getElementById('pos-buyer-name').value = '';
+            document.getElementById('cart-discount-input').value = '0';
             renderPosSearchResults();
+            renderInventoryTable();
+            renderInventorySheetTable();
+            renderProductsTable();
             renderDashboard();
-            showToast('تمت العملية واستخراج الفاتورة بنجاح!', 'success');
-        }
-
-        function showPrintModal(inv) {
-            const modal = document.getElementById('print-modal');
-            const container = document.getElementById('printable-invoice');
-
-            const dateStr = new Date(inv.date).toLocaleString('ar-EG');
-            container.innerHTML = `
-                <div class="text-center pb-3 border-b dark:border-gray-700">
-                    <h3 class="font-extrabold text-base text-gray-900 dark:text-white">Nour Group ERP</h3>
-                    <p class="text-[11px] text-gray-500">نظام إدارة المبيعات والمخزون — مصر</p>
-                    <p class="text-[11px] font-bold text-blue-600 mt-1">فاتورة مبيعات رقم #${inv.id}</p>
-                </div>
-                <div class="py-2 text-[11px] space-y-1 text-gray-700 dark:text-gray-300">
-                    <div class="flex justify-between"><span>التاريخ:</span><span class="font-mono">${dateStr}</span></div>
-                    <div class="flex justify-between"><span>العميل:</span><span class="font-bold">${inv.buyerName}</span></div>
-                    <div class="flex justify-between"><span>البائع:</span><span>${inv.sellerName}</span></div>
-                    <div class="flex justify-between"><span>طريقة الدفع:</span><span>${inv.paymentMethod}</span></div>
-                </div>
-                <div class="border-t border-b dark:border-gray-700 py-2 space-y-1">
-                    <div class="grid grid-cols-12 font-bold text-[10px] text-gray-400 pb-1">
-                        <span class="col-span-6">الصنف</span>
-                        <span class="col-span-2 text-center">الكمية</span>
-                        <span class="col-span-4 text-left">السعر</span>
-                    </div>
-                    ${inv.items.map(i => `
-                        <div class="grid grid-cols-12 text-[11px] items-center">
-                            <span class="col-span-6 font-medium line-clamp-1">${i.name}</span>
-                            <span class="col-span-2 text-center font-bold">${i.quantity}</span>
-                            <span class="col-span-4 text-left font-mono">${(i.price * i.quantity).toFixed(2)}</span>
-                        </div>
-                    `).join('')}
-                </div>
-                <div class="pt-2 space-y-1 text-xs">
-                    <div class="flex justify-between"><span>المجموع:</span><span class="font-mono">${inv.subtotal.toFixed(2)} ج.م</span></div>
-                    ${inv.discount > 0 ? `<div class="flex justify-between text-amber-600"><span>الخصم:</span><span class="font-mono">-${inv.discount.toFixed(2)} ج.م</span></div>` : ''}
-                    <div class="flex justify-between font-extrabold text-sm text-blue-600 pt-1 border-t dark:border-gray-700">
-                        <span>الإجمالي النهائي:</span>
-                        <span class="font-mono">${inv.finalTotal.toFixed(2)} ج.م</span>
-                    </div>
-                </div>
-                <div class="text-center text-[10px] text-gray-400 pt-3 border-t dark:border-gray-700">
-                    شكراً لتعاملكم معنا — Nour Group 2026
-                </div>
-            `;
-
-            modal.classList.remove('hidden');
-        }
-
-        function closePrintModal() {
-            document.getElementById('print-modal').classList.add('hidden');
         }
 
         function renderInventoryTable() {
@@ -1357,11 +1298,10 @@
                 filtered = filtered.filter(p => p.stock <= 10);
             }
 
-            const totalItems = products.length;
             const totalQty = products.reduce((sum, p) => sum + p.stock, 0);
             const lowItems = products.filter(p => p.stock <= 10).length;
 
-            document.getElementById('inv-total-items').innerText = totalItems;
+            document.getElementById('inv-total-items').innerText = products.length;
             document.getElementById('inv-total-quantity').innerText = totalQty.toLocaleString('ar-EG');
             document.getElementById('inv-low-items').innerText = lowItems;
 
@@ -1370,15 +1310,15 @@
                 return;
             }
 
-            tbody.innerHTML = filtered.map(prod => `
+            tbody.innerHTML = filtered.map(p => `
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b dark:border-gray-700">
-                    <td class="p-3.5 font-bold text-gray-700 dark:text-gray-300">${prod.code}</td>
-                    <td class="p-3.5 font-bold text-gray-800 dark:text-white">${prod.name}</td>
-                    <td class="p-3.5 text-gray-500">${prod.category}</td>
-                    <td class="p-3.5 font-bold ${prod.stock <= 10 ? 'text-rose-600' : 'text-emerald-600'}">${prod.stock} وحدة</td>
-                    <td class="p-3.5 font-mono font-bold text-blue-600 dark:text-blue-400">${prod.price.toFixed(2)} ج.م</td>
+                    <td class="p-3.5 font-bold text-gray-700 dark:text-gray-300">${p.code}</td>
+                    <td class="p-3.5 font-bold text-gray-800 dark:text-white">${p.name}</td>
+                    <td class="p-3.5 text-gray-500">${p.category}</td>
+                    <td class="p-3.5 font-bold text-blue-600 dark:text-blue-400">${p.stock}</td>
+                    <td class="p-3.5 font-bold text-gray-800 dark:text-white">${p.price.toFixed(2)} ج.م</td>
                     <td class="p-3.5">
-                        ${prod.stock <= 10 ? '<span class="px-2.5 py-1 bg-rose-100 text-rose-700 font-bold rounded-full text-xs">منخفض</span>' : '<span class="px-2.5 py-1 bg-emerald-100 text-emerald-700 font-bold rounded-full text-xs">متوفر</span>'}
+                        ${p.stock <= 10 ? '<span class="px-2.5 py-1 bg-rose-100 text-rose-700 font-bold rounded-full text-xs">منخفض</span>' : '<span class="px-2.5 py-1 bg-emerald-100 text-emerald-700 font-bold rounded-full text-xs">متوفر</span>'}
                     </td>
                 </tr>
             `).join('');
@@ -1400,18 +1340,18 @@
                 return;
             }
 
-            tbody.innerHTML = filtered.map(prod => `
+            tbody.innerHTML = filtered.map(p => `
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b dark:border-gray-700">
-                    <td class="p-3.5 font-bold text-gray-700 dark:text-gray-300">${prod.code}</td>
-                    <td class="p-3.5 font-mono text-xs text-gray-500">${prod.barcode || '-'}</td>
-                    <td class="p-3.5 font-bold text-gray-800 dark:text-white">${prod.name}</td>
-                    <td class="p-3.5 text-gray-500">${prod.category}</td>
-                    <td class="p-3.5 font-mono font-bold text-blue-600 dark:text-blue-400">${prod.price.toFixed(2)} ج.م</td>
-                    <td class="p-3.5 font-mono text-gray-500">${prod.cost.toFixed(2)} ج.م</td>
-                    <td class="p-3.5 font-bold ${prod.stock <= 10 ? 'text-rose-600' : 'text-gray-700 dark:text-gray-200'}">${prod.stock}</td>
-                    <td class="p-3.5 text-center space-x-1 space-x-reverse">
-                        <button onclick="openProductModal(${prod.id})" class="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs" title="تعديل"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="openDeleteProductModal(${prod.id})" class="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-xs" title="حذف"><i class="fa-solid fa-trash"></i></button>
+                    <td class="p-3.5 font-bold text-gray-700 dark:text-gray-300">${p.code}</td>
+                    <td class="p-3.5 font-mono text-xs text-gray-500">${p.barcode || '-'}</td>
+                    <td class="p-3.5 font-bold text-gray-800 dark:text-white">${p.name}</td>
+                    <td class="p-3.5 text-gray-500">${p.category}</td>
+                    <td class="p-3.5 font-bold text-blue-600 dark:text-blue-400">${p.price.toFixed(2)} ج.م</td>
+                    <td class="p-3.5 text-gray-500">${p.cost.toFixed(2)} ج.م</td>
+                    <td class="p-3.5 font-bold">${p.stock}</td>
+                    <td class="p-3.5 text-center flex justify-center gap-2">
+                        <button onclick="openProductModal(${p.id})" class="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-bold" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="openDeleteProductModal(${p.id})" class="p-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-xs font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>
             `).join('');
@@ -1421,28 +1361,25 @@
             const modal = document.getElementById('product-modal');
             const title = document.getElementById('modal-title');
             
+            document.getElementById('product-form').reset();
+            document.getElementById('prod-id').value = '';
+
             if (prodId) {
                 const prod = products.find(p => p.id === prodId);
-                if (!prod) return;
-                title.innerText = 'تعديل بيانات الصنف';
-                document.getElementById('prod-id').value = prod.id;
-                document.getElementById('modal-code').value = prod.code;
-                document.getElementById('modal-barcode').value = prod.barcode || '';
-                document.getElementById('modal-name').value = prod.name;
-                document.getElementById('modal-category').value = prod.category;
-                document.getElementById('modal-price').value = prod.price;
-                document.getElementById('modal-cost').value = prod.cost;
-                document.getElementById('modal-stock').value = prod.stock;
+                if (prod) {
+                    title.innerText = 'تعديل صنف حالي';
+                    document.getElementById('prod-id').value = prod.id;
+                    document.getElementById('modal-code').value = prod.code;
+                    document.getElementById('modal-barcode').value = prod.barcode || '';
+                    document.getElementById('modal-name').value = prod.name;
+                    document.getElementById('modal-category').value = prod.category;
+                    document.getElementById('modal-price').value = prod.price;
+                    document.getElementById('modal-cost').value = prod.cost;
+                    document.getElementById('modal-stock').value = prod.stock;
+                }
             } else {
                 title.innerText = 'إضافة صنف جديد';
-                document.getElementById('prod-id').value = '';
-                document.getElementById('modal-code').value = (Math.floor(1000 + Math.random() * 9000)).toString();
-                document.getElementById('modal-barcode').value = '';
-                document.getElementById('modal-name').value = '';
-                document.getElementById('modal-category').value = 'عام';
-                document.getElementById('modal-price').value = '';
-                document.getElementById('modal-cost').value = '';
-                document.getElementById('modal-stock').value = '10';
+                document.getElementById('modal-code').value = (Math.max(...products.map(p => parseInt(p.code) || 1000), 1060) + 1).toString();
             }
 
             modal.classList.remove('hidden');
@@ -1464,7 +1401,7 @@
             const stock = parseInt(document.getElementById('modal-stock').value) || 0;
 
             if (idVal) {
-                const prod = products.find(p => p.id == idVal);
+                const prod = products.find(p => p.id === parseInt(idVal));
                 if (prod) {
                     prod.code = code;
                     prod.barcode = barcode;
@@ -1473,8 +1410,18 @@
                     prod.price = price;
                     prod.cost = cost;
                     prod.stock = stock;
-                    showToast('تم تحديث الصنف بنجاح!', 'success');
                 }
+                // تحديث خانة الجرد إذا كان الصنف موجوداً بها
+                const sheetItem = inventorySheet.find(si => si.code === code);
+                if (sheetItem) {
+                    sheetItem.name = name;
+                    sheetItem.category = category;
+                    sheetItem.barcode = barcode;
+                    sheetItem.actualStock = stock;
+                } else {
+                    inventorySheet.push({ code, barcode, name, category, sysStock: stock, actualStock: stock, location: "kat/stock-line/ZA-NEW" });
+                }
+                showToast('تم تعديل الصنف بنجاح!', 'success');
             } else {
                 const newProd = {
                     id: Date.now(),
@@ -1487,57 +1434,43 @@
                     stock
                 };
                 products.push(newProd);
-
-                // أضف أيضاً إلى خانة الجرد تلقائياً لتكامل النظام
-                inventorySheet.push({
-                    code,
-                    barcode,
-                    name,
-                    category,
-                    sysStock: stock,
-                    actualStock: stock,
-                    location: "kat/stock-line/ZA-05-C01"
-                });
-                saveInventorySheetToStorage();
-
+                inventorySheet.push({ code, barcode, name, category, sysStock: stock, actualStock: stock, location: "kat/stock-line/ZA-NEW" });
                 showToast('تمت إضافة الصنف الجديد بنجاح!', 'success');
             }
 
             saveProductsToStorage();
+            saveInventorySheetToStorage();
             closeProductModal();
             renderProductsTable();
             renderInventoryTable();
             renderInventorySheetTable();
+            renderPosSearchResults();
         }
 
         function openDeleteProductModal(prodId) {
             const prod = products.find(p => p.id === prodId);
             if (!prod) return;
-            selectedProductToDelete = prodId;
+            selectedProductToDelete = prod;
             document.getElementById('delete-prod-name').innerText = prod.name;
             document.getElementById('delete-product-modal').classList.remove('hidden');
-            document.getElementById('confirm-delete-prod-btn').onclick = confirmDeleteProduct;
+
+            document.getElementById('confirm-delete-prod-btn').onclick = function() {
+                products = products.filter(p => p.id === prod.id);
+                inventorySheet = inventorySheet.filter(si => si.code !== prod.code);
+                saveProductsToStorage();
+                saveInventorySheetToStorage();
+                closeDeleteProductModal();
+                renderProductsTable();
+                renderInventoryTable();
+                renderInventorySheetTable();
+                renderPosSearchResults();
+                showToast('تم حذف الصنف نهائياً بنجاح', 'success');
+            }
         }
 
         function closeDeleteProductModal() {
             document.getElementById('delete-product-modal').classList.add('hidden');
             selectedProductToDelete = null;
-        }
-
-        function confirmDeleteProduct() {
-            if (!selectedProductToDelete) return;
-            const prod = products.find(p => p.id === selectedProductToDelete);
-            if (prod) {
-                products = products.filter(p => p.id !== selectedProductToDelete);
-                inventorySheet = inventorySheet.filter(i => i.code !== prod.code);
-                saveProductsToStorage();
-                saveInventorySheetToStorage();
-                renderProductsTable();
-                renderInventoryTable();
-                renderInventorySheetTable();
-                showToast('تم حذف الصنف نهائياً!', 'success');
-            }
-            closeDeleteProductModal();
         }
 
         function renderInvoicesList() {
@@ -1546,23 +1479,21 @@
 
             const filtered = invoices.filter(i => 
                 i.id.toLowerCase().includes(query) ||
-                i.buyerName.toLowerCase().includes(query) ||
-                i.sellerName.toLowerCase().includes(query) ||
-                i.paymentMethod.toLowerCase().includes(query)
+                (i.buyerName && i.buyerName.toLowerCase().includes(query)) ||
+                (i.sellerName && i.sellerName.toLowerCase().includes(query))
             ).reverse();
 
-            const sumCount = invoices.length;
-            const sumSales = invoices.reduce((sum, i) => sum + (i.finalTotal || 0), 0);
-            const sumProfit = invoices.reduce((sum, i) => sum + (i.profit || 0), 0);
-            const sumDiscount = invoices.reduce((sum, i) => sum + (i.discount || 0), 0);
+            const totalSales = invoices.reduce((sum, i) => sum + i.finalTotal, 0);
+            const totalProfit = invoices.reduce((sum, i) => sum + i.profit, 0);
+            const totalDiscount = invoices.reduce((sum, i) => sum + (i.discount || 0), 0);
 
-            document.getElementById('inv-sum-count').innerText = sumCount;
-            document.getElementById('inv-sum-sales').innerText = sumSales.toFixed(2) + ' ج.م';
-            document.getElementById('inv-sum-profit').innerText = sumProfit.toFixed(2) + ' ج.م';
-            document.getElementById('inv-sum-discount').innerText = sumDiscount.toFixed(2) + ' ج.م';
+            document.getElementById('inv-sum-count').innerText = invoices.length;
+            document.getElementById('inv-sum-sales').innerText = totalSales.toFixed(2) + ' ج.م';
+            document.getElementById('inv-sum-profit').innerText = totalProfit.toFixed(2) + ' ج.م';
+            document.getElementById('inv-sum-discount').innerText = totalDiscount.toFixed(2) + ' ج.م';
 
             if (filtered.length === 0) {
-                container.innerHTML = '<p class="text-gray-400 text-sm text-center py-12">لا توجد فواتير مسجلة مطابقة</p>';
+                container.innerHTML = '<p class="text-gray-400 text-sm text-center py-12">لا توجد فواتير مسجلة</p>';
                 return;
             }
 
@@ -1573,43 +1504,36 @@
                             <span class="font-black text-blue-600 dark:text-blue-400 text-base">فاتورة #${inv.id}</span>
                             <span class="text-xs bg-gray-100 dark:bg-gray-700 font-semibold px-2 py-0.5 rounded text-gray-600 dark:text-gray-300">${inv.paymentMethod}</span>
                         </div>
-                        <div class="text-xs text-gray-500 flex flex-wrap gap-x-4 gap-y-1">
-                            <span>العميل: <strong class="text-gray-700 dark:text-gray-200">${inv.buyerName}</strong></span>
-                            <span>البائع: <strong class="text-gray-700 dark:text-gray-200">${inv.sellerName}</strong></span>
-                            <span>التاريخ: ${new Date(inv.date).toLocaleString('ar-EG')}</span>
-                        </div>
-                        <div class="text-xs text-gray-400">
-                            الأصناف: ${inv.items.map(i => `${i.name} (${i.quantity})`).join(', ')}
-                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                            المشتري: <span class="font-bold text-gray-700 dark:text-gray-200">${inv.buyerName || 'نقدي'}</span> | 
+                            البائع: <span class="font-semibold text-gray-600 dark:text-gray-300">${inv.sellerName}</span> | 
+                            التاريخ: ${new Date(inv.date).toLocaleString('ar-EG')}
+                        </p>
+                        <p class="text-xs text-gray-400">عدد الأصناف: ${inv.items.length} أصناف (${inv.items.reduce((s, x) => s + x.quantity, 0)} قطعة)</p>
                     </div>
-                    <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-4">
+                    <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-gray-100 dark:border-gray-700">
                         <div class="text-left">
-                            <span class="text-lg font-black text-gray-800 dark:text-white">${inv.finalTotal.toFixed(2)} ج.م</span>
-                            <p class="text-xs text-emerald-600 font-semibold">ربح: ${inv.profit.toFixed(2)} ج.م</p>
+                            <p class="text-xs text-gray-400">الإجمالي النهائي</p>
+                            <p class="text-lg font-black text-gray-800 dark:text-white">${inv.finalTotal.toFixed(2)} ج.م</p>
                         </div>
-                        <div class="flex items-center gap-1.5">
-                            <button onclick="reprintInvoice('${inv.id}')" class="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-xl text-xs font-bold" title="طباعة"><i class="fa-solid fa-print"></i></button>
-                            <button onclick="openEditInvoiceModal('${inv.id}')" class="p-2 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-xl text-xs font-bold" title="تعديل"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="openDeleteModal('${inv.id}')" class="p-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl text-xs font-bold" title="حذف"><i class="fa-solid fa-trash"></i></button>
+                        <div class="flex items-center gap-1">
+                            <button onclick='openPrintModal(${JSON.stringify(inv)})' class="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-bold" title="طباعة العرض"><i class="fa-solid fa-print"></i></button>
+                            <button onclick="openEditInvoiceModal('${inv.id}')" class="p-2 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg text-xs font-bold" title="تعديل"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="openDeleteModal('${inv.id}')" class="p-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-xs font-bold" title="حذف وإعادة المخزون"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        function reprintInvoice(invId) {
-            const inv = invoices.find(i => i.id === invId);
-            if (inv) showPrintModal(inv);
-        }
-
         function openEditInvoiceModal(invId) {
             const inv = invoices.find(i => i.id === invId);
             if (!inv) return;
             document.getElementById('edit-inv-id').value = inv.id;
-            document.getElementById('edit-inv-id-display.innerText') = `#${inv.id}`;
-            document.getElementById('edit-inv-buyer').value = inv.buyerName;
-            document.getElementById('edit-inv-seller').value = inv.sellerName;
-            document.getElementById('edit-inv-payment').value = inv.paymentMethod;
+            document.getElementById('edit-inv-id-display').innerText = '#' + inv.id;
+            document.getElementById('edit-inv-buyer').value = inv.buyerName || '';
+            document.getElementById('edit-inv-seller').value = inv.sellerName || '';
+            document.getElementById('edit-inv-payment').value = inv.paymentMethod || 'نقداً (كاش)';
             document.getElementById('edit-invoice-modal').classList.remove('hidden');
         }
 
@@ -1619,29 +1543,57 @@
 
         function saveInvoiceEdits(e) {
             e.preventDefault();
-            const id = document.getElementById('edit-inv-id').value;
-            const buyerName = document.getElementById('edit-inv-buyer').value.trim();
-            const sellerName = document.getElementById('edit-inv-seller').value.trim();
-            const paymentMethod = document.getElementById('edit-inv-payment').value;
+            const invId = document.getElementById('edit-inv-id').value;
+            const buyer = document.getElementById('edit-inv-buyer').value.trim();
+            const seller = document.getElementById('edit-inv-seller').value.trim();
+            const payment = document.getElementById('edit-inv-payment').value;
 
-            const inv = invoices.find(i => i.id === id);
+            const inv = invoices.find(i => i.id === invId);
             if (inv) {
-                inv.buyerName = buyerName;
-                inv.sellerName = sellerName;
-                inv.paymentMethod = paymentMethod;
+                inv.buyerName = buyer;
+                inv.sellerName = seller;
+                inv.paymentMethod = payment;
                 saveInvoicesToStorage();
+                showToast('تم تعديل بيانات الفاتورة بنجاح!', 'success');
+                closeEditInvoiceModal();
                 renderInvoicesList();
                 renderDashboard();
-                closeEditInvoiceModal();
-                showToast('تم تعديل بيانات الفاتورة بنجاح!', 'success');
             }
         }
 
         function openDeleteModal(invId) {
-            selectedInvoiceToDelete = invId;
-            document.getElementById('delete-inv-id').innerText = `#${invId}`;
+            const inv = invoices.find(i => i.id === invId);
+            if (!inv) return;
+            selectedInvoiceToDelete = inv;
+            document.getElementById('delete-inv-id').innerText = '#' + inv.id;
             document.getElementById('delete-modal').classList.remove('hidden');
-            document.getElementById('confirm-delete-btn').onclick = confirmDeleteInvoice;
+
+            document.getElementById('confirm-delete-btn').onclick = function() {
+                // إعادة المخزون الأصلي للأصناف عند الحذف
+                inv.items.forEach(item => {
+                    const prod = products.find(p => p.id === item.id);
+                    if (prod) {
+                        prod.stock += item.quantity;
+                    }
+                    const sheetItem = inventorySheet.find(si => si.code === item.code);
+                    if (sheetItem) {
+                        sheetItem.actualStock = parseInt(sheetItem.actualStock) + item.quantity;
+                    }
+                });
+
+                invoices = invoices.filter(i => i.id !== inv.id);
+                saveInvoicesToStorage();
+                saveProductsToStorage();
+                saveInventorySheetToStorage();
+                closeDeleteModal();
+                renderInvoicesList();
+                renderInventoryTable();
+                renderInventorySheetTable();
+                renderProductsTable();
+                renderPosSearchResults();
+                renderDashboard();
+                showToast('تم حذف الفاتورة وإعادة الأصناف للمخزون والجرد بنجاح', 'success');
+            }
         }
 
         function closeDeleteModal() {
@@ -1649,26 +1601,48 @@
             selectedInvoiceToDelete = null;
         }
 
-        function confirmDeleteInvoice() {
-            if (!selectedInvoiceToDelete) return;
-            const inv = invoices.find(i => i.id === selectedInvoiceToDelete);
-            if (inv) {
-                // استرداد المخزون تلقائياً
-                inv.items.forEach(item => {
-                    const prod = products.find(p => p.id === item.id);
-                    if (prod) {
-                        prod.stock += item.quantity;
-                    }
-                });
-                invoices = invoices.filter(i => i.id !== selectedInvoiceToDelete);
-                saveInvoicesToStorage();
-                saveProductsToStorage();
-                renderInvoicesList();
-                renderInventoryTable();
-                renderDashboard();
-                showToast('تم حذف الفاتورة واسترداد المخزون بنجاح!', 'success');
-            }
-            closeDeleteModal();
+        function openPrintModal(invoiceData) {
+            const container = document.getElementById('printable-invoice');
+            container.innerHTML = `
+                <div class="text-center pb-3 border-b dark:border-gray-700 space-y-1">
+                    <h2 class="font-extrabold text-sm sm:text-base">نور جروب للمبيعات والمخزون</h2>
+                    <p class="text-[10px] text-gray-500">فاتورة مبيعات معتمدة — مصر</p>
+                    <p class="text-[10px] font-mono">رقم الفاتورة: #${invoiceData.id}</p>
+                </div>
+                <div class="py-2 space-y-1 text-[11px] border-b dark:border-gray-700">
+                    <div class="flex justify-between"><span>التاريخ:</span><span class="font-bold">${new Date(invoiceData.date).toLocaleString('ar-EG')}</span></div>
+                    <div class="flex justify-between"><span>المشتري:</span><span class="font-bold">${invoiceData.buyerName || 'نقدي'}</span></div>
+                    <div class="flex justify-between"><span>البائع:</span><span class="font-bold">${invoiceData.sellerName}</span></div>
+                    <div class="flex justify-between"><span>الدفع:</span><span class="font-bold">${invoiceData.paymentMethod}</span></div>
+                </div>
+                <div class="py-2 space-y-2">
+                    <p class="font-bold text-[11px] text-gray-600 dark:text-gray-300">الأصناف المباعة:</p>
+                    <div class="space-y-1.5 divide-y divide-gray-100 dark:divide-gray-800">
+                        ${invoiceData.items.map(i => `
+                            <div class="pt-1.5 flex justify-between items-center text-[11px]">
+                                <div>
+                                    <p class="font-bold">${i.name}</p>
+                                    <p class="text-[10px] text-gray-400">${i.quantity} قطعة × ${i.price.toFixed(2)}</p>
+                                </div>
+                                <span class="font-bold">${(i.price * i.quantity).toFixed(2)} ج.م</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="pt-3 border-t dark:border-gray-700 space-y-1 text-[11px]">
+                    <div class="flex justify-between"><span>الإجمالي الفرعي:</span><span class="font-bold">${invoiceData.subtotal.toFixed(2)} ج.م</span></div>
+                    ${invoiceData.discount > 0 ? `<div class="flex justify-between text-amber-600"><span>الخصم:</span><span class="font-bold">-${invoiceData.discount.toFixed(2)} ج.م</span></div>` : ''}
+                    <div class="flex justify-between text-sm font-black text-blue-600 dark:text-blue-400 pt-1 border-t dark:border-gray-800"><span>الإجمالي النهائي:</span><span>${invoiceData.finalTotal.toFixed(2)} ج.م</span></div>
+                </div>
+                <div class="text-center pt-3 text-[10px] text-gray-400 border-t dark:border-gray-700">
+                    شكراً لتعاملكم مع مجموعة نور جروب &copy; 2026[cite: 2]
+                </div>
+            `;
+            document.getElementById('print-modal').classList.remove('hidden');
+        }
+
+        function closePrintModal() {
+            document.getElementById('print-modal').classList.add('hidden');
         }
 
         function renderOrdersList() {
@@ -1684,21 +1658,22 @@
                 <div class="p-4 sm:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div class="space-y-1">
                         <div class="flex items-center gap-2">
-                            <span class="font-black text-rose-600 text-base">اوردر إلكتروني #${ord.id}</span>
-                            <span class="text-xs bg-blue-100 text-blue-700 font-semibold px-2 py-0.5 rounded">${ord.paymentMethod}</span>
+                            <span class="font-black text-indigo-600 dark:text-indigo-400 text-base">طلب موقع #${ord.id}</span>
+                            <span class="text-xs bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5 rounded">${ord.paymentMethod}</span>
                         </div>
-                        <p class="text-xs text-gray-500">العميل: <strong class="text-gray-700 dark:text-gray-200">${ord.buyerName}</strong> — التاريخ: ${new Date(ord.date).toLocaleString('ar-EG')}</p>
-                        <div class="text-xs text-gray-400">
-                            الأصناف المطلوبة: ${ord.items.map(i => `${i.name} (${i.quantity})`).join(', ')}
-                        </div>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">العميل: <span class="font-bold text-gray-700 dark:text-gray-200">${ord.buyerName}</span> | التاريخ: ${new Date(ord.date).toLocaleString('ar-EG')}</p>
+                        <p class="text-xs text-gray-400">الأصناف: ${ord.items.map(x => `${x.name} (${x.quantity})`).join(', ')}</p>
                     </div>
-                    <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-4">
-                        <span class="text-lg font-black text-gray-800 dark:text-white">${ord.finalTotal.toFixed(2)} ج.م</span>
+                    <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+                        <div class="text-left">
+                            <p class="text-xs text-gray-400">قيمة الطلب</p>
+                            <p class="text-base font-black text-gray-800 dark:text-white">${ord.finalTotal.toFixed(2)} ج.م</p>
+                        </div>
                         <div class="flex gap-2">
-                            <button onclick="approveOrder('${ord.id}')" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow">
-                                <i class="fa-solid fa-check"></i> اعتماد وتحويل لفاتورة
+                            <button onclick="approveOrder('${ord.id}')" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow flex items-center gap-1">
+                                <i class="fa-solid fa-check"></i> موافقة واعتماد
                             </button>
-                            <button onclick="rejectOrder('${ord.id}')" class="px-3 py-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-xl text-xs font-bold">رفض</button>
+                            <button onclick="rejectOrder('${ord.id}')" class="px-3 py-2 bg-rose-100 text-rose-700 hover:bg-rose-200 rounded-lg text-xs font-bold">رفض</button>
                         </div>
                     </div>
                 </div>
@@ -1706,59 +1681,78 @@
         }
 
         function simulateIncomingOrder() {
-            const randomId = Math.floor(9000 + Math.random() * 900).toString();
-            const sampleProd = products[Math.floor(Math.random() * products.length)];
             const newOrd = {
-                id: randomId,
+                id: Math.floor(9000 + Math.random() * 900).toString(),
                 date: new Date().toISOString(),
-                buyerName: "عميل ويب جديد",
+                buyerName: "أحمد محمود (موقع إلكتروني)",
                 sellerName: "أونلاين",
-                paymentMethod: "نقداً (كاش)",
+                paymentMethod: "بطاقة (فيزا)",
                 items: [
-                    { id: sampleProd.id, name: sampleProd.name, category: sampleProd.category, price: sampleProd.price, cost: sampleProd.cost, quantity: 1 }
+                    { id: 1001, code: "1001", name: "شاي العروسة ناعم - 40 جم", category: "شاي ناعم", price: 12, cost: 9.6, quantity: 1 }
                 ],
-                subtotal: sampleProd.price,
+                subtotal: 12,
                 discount: 0,
-                finalTotal: sampleProd.price,
-                profit: sampleProd.price - sampleProd.cost
+                finalTotal: 12,
+                profit: 2.4
             };
             orders.push(newOrd);
             saveOrdersToStorage();
             renderOrdersList();
-            showToast('تم استقبال اوردر جديد من الموقع الإلكتروني بنجاح!', 'success');
+            showToast('تم استلام طلب جديد من الموقع الإلكتروني بنجاح!', 'info');
         }
 
         function approveOrder(ordId) {
-            const ordIdx = orders.findIndex(o => o.id === ordId);
-            if (ordIdx === -1) return;
-            const ord = orders[ordIdx];
+            const ord = orders.find(o => o.id === ordId);
+            if (!ord) return;
 
-            // تحويل الطلب إلى فاتورة رسمية وخصم المخزون
-            for (const item of ord.items) {
-                const prod = products.find(p => p.id === item.id);
-                if (prod) prod.stock -= item.quantity;
-            }
+            // تحويل الطلب إلى فاتورة رسمية وخصم الكميات
+            ord.items.forEach(item => {
+                const prod = products.find(p => p.code === item.code || p.id === item.id);
+                if (prod) {
+                    prod.stock = Math.max(0, prod.stock - item.quantity);
+                }
+                const sheetItem = inventorySheet.find(si => si.code === item.code);
+                if (sheetItem) {
+                    sheetItem.actualStock = Math.max(0, parseInt(sheetItem.actualStock) - item.quantity);
+                }
+            });
 
-            invoices.push(ord);
-            orders.splice(ordIdx, 1);
+            invoices.push({
+                id: ord.id,
+                date: ord.date,
+                buyerName: ord.buyerName,
+                sellerName: ord.sellerName,
+                paymentMethod: ord.paymentMethod,
+                items: ord.items,
+                subtotal: ord.subtotal,
+                discount: ord.discount,
+                finalTotal: ord.finalTotal,
+                profit: ord.profit
+            });
 
-            saveInvoicesToStorage();
+            orders = orders.filter(o => o.id !== ordId);
             saveOrdersToStorage();
+            saveInvoicesToStorage();
             saveProductsToStorage();
+            saveInventorySheetToStorage();
 
             renderOrdersList();
-            renderDashboard();
+            renderInvoicesList();
             renderInventoryTable();
-            showToast('تم اعتماد الطلب وتحويله لفاتورة مبيعات بنجاح!', 'success');
+            renderInventorySheetTable();
+            renderProductsTable();
+            renderPosSearchResults();
+            renderDashboard();
+
+            showToast(`تم اعتماد الطلب #${ord.id} وتحويله لفاتورة مبيعات بنجاح!`, 'success');
         }
 
         function rejectOrder(ordId) {
             orders = orders.filter(o => o.id !== ordId);
             saveOrdersToStorage();
             renderOrdersList();
-            showToast('تم رفض وحذف الطلب.', 'info');
+            showToast('تم رفض الطلب بنجاح', 'info');
         }
     </script>
 </body>
 </html>
-```[cite: 2]
