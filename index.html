@@ -28,7 +28,6 @@
 </head>
 <body class="flex flex-col lg:flex-row h-screen overflow-hidden text-gray-800 dark:text-gray-100 bg-[#f4f6f9] dark:bg-gray-900 transition-colors duration-200">
 
-    <!-- شاشة تسجيل الدخول -->
     <div id="login-overlay" class="fixed inset-0 bg-[#0b1329] z-50 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6 sm:p-8 shadow-2xl text-center space-y-6 border border-gray-700">
             <div class="w-28 h-28 sm:w-36 sm:h-36 bg-white rounded-2xl p-3 shadow-md mx-auto flex items-center justify-center border border-gray-200">
@@ -347,8 +346,11 @@
                     <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">إدارة الأعداد واللوكيشنات وحساب النواقص الفورية بالتطابق </p>
                 </div>
                 <div class="flex gap-2">
+                    <button onclick="syncSheetWithProducts()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-3 py-2 rounded-lg text-xs flex items-center gap-1 shadow">
+                        <i class="fa-solid fa-arrows-rotate"></i> دمج وتحديث الأعداد مع الأصناف
+                    </button>
                     <button onclick="resetInventorySheetData()" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-3 py-2 rounded-lg text-xs flex items-center gap-1 shadow">
-                        <i class="fa-solid fa-rotate-right"></i> استعادة البيانات الافتراضية
+                        <i class="fa-solid fa-rotate-right"></i> استعادة الافتراضي
                     </button>
                     <button onclick="saveInventorySheetChanges()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-lg text-xs flex items-center gap-1 shadow">
                         <i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات
@@ -383,7 +385,7 @@
                             <th class="p-3">باركود المنتج</th>
                             <th class="p-3">اسم الصنف بالتفصيل</th>
                             <th class="p-3">الفئة</th>
-                            <th class="p-3 text-center">مخزون السيستم</th>
+                            <th class="p-3 text-center">مخزون السيستم (من قائمة الأصناف)</th>
                             <th class="p-3 text-center">المخزون الفعلي (قابل للتعديل)</th>
                             <th class="p-3 text-center">نواقص الاصناف</th>
                             <th class="p-3">لوكيشن الاصناف (قابل للتعديل)</th>
@@ -721,76 +723,11 @@
             { id: 1060, code: "1060", barcode: "6222002300099", name: "كيس رز 1 كيلو", category: "رز الضحي", price: 30, cost: 22, stock: 100 },
         ];
 
-        const defaultInventorySheet = [
-            { code: "1001", barcode: "6222002300016", name: "شاي العروسة ناعم - 40 جم", category: "شاي ناعم", sysStock: 2, actualStock: 1, location: "kat/stock-line/ZA-01-A01" },
-            { code: "1002", barcode: "6222002300023", name: "شاي العروسة ناعم - 100 جم", category: "شاي ناعم", sysStock: 88, actualStock: 77, location: "kat/stock-line/ZA-01-A02" },
-            { code: "1003", barcode: "6222002300030", name: "شاي العروسة ناعم - 250 جم", category: "شاي ناعم", sysStock: 34, actualStock: 34, location: "kat/stock-line/ZA-01-A03" },
-            { code: "1004", barcode: "6222002300122", name: "شاي العروسة فتلة - 25 فتلة", category: "شاي فتلة", sysStock: 22, actualStock: 21, location: "kat/stock-line/ZA-01-A04" },
-            { code: "1005", barcode: "6222002300153", name: "شاي العروسة فتلة - 100 فتلة", category: "شاي فتلة", sysStock: 15, actualStock: 11, location: "kat/stock-line/ZA-01-A05" },
-            { code: "1006", barcode: "6221048700415", name: "شاي ليبتون أسود ناعم - 40 جم", category: "شاي ناعم", sysStock: 48, actualStock: 48, location: "kat/stock-line/ZA-01-A06" },
-            { code: "1007", barcode: "6221048700439", name: "شاي ليبتون أسود ناعم - 100 جم", category: "شاي ناعم", sysStock: 53, actualStock: 53, location: "kat/stock-line/ZA-01-B01" },
-            { code: "1008", barcode: "5063305009548", name: "شاي ليبتون أسود ناعم - 250 جم", category: "شاي ناعم", sysStock: 30, actualStock: 30, location: "kat/stock-line/ZA-01-B02" },
-            { code: "1009", barcode: "6221048700118", name: "شاي ليبتون فتلة - 25 فتلة", category: "شاي فتلة", sysStock: 65, actualStock: 65, location: "kat/stock-line/ZA-01-B03" },
-            { code: "1010", barcode: "6221048700736", name: "شاي ليبتون فتلة - 100 فتلة", category: "شاي فتلة", sysStock: 33, actualStock: 33, location: "kat/stock-line/ZA-01-B04" },
-            { code: "1011", barcode: "6221048701108", name: "شاي ليبتون أخضر فتلة - 25 فتلة", category: "شاي أخضر", sysStock: 20, actualStock: 20, location: "kat/stock-line/ZA-01-B05" },
-            { code: "1012", barcode: "6223006100125", name: "شاي أحمد تي أسود (أوراق كاملة) - 100 جم", category: "شاي فاخر", sysStock: 100, actualStock: 99, location: "kat/stock-line/ZA-01-B06" },
-            { code: "1013", barcode: "6223006100156", name: "شاي أحمد تي إيرل جراي - 100 جم", category: "شاي فاخر", sysStock: 85, actualStock: 85, location: "kat/stock-line/ZA-02-A01" },
-            { code: "1014", barcode: "6223006100224", name: "شاي أحمد تي أخضر فتلة - 25 فتلة", category: "شاي أخضر", sysStock: 12, actualStock: 11, location: "kat/stock-line/ZA-02-A02" },
-            { code: "1015", barcode: "6224001200119", name: "شاي الربيع إكسبريس فتلة - 100 فتلة", category: "شاي فتلة", sysStock: 14, actualStock: 10, location: "kat/stock-line/ZA-02-A03" },
-            { code: "1016", barcode: "6224001200140", name: "شاي الربيع أوراق كاملة - 200 جم", category: "شاي فاخر", sysStock: 57, actualStock: 55, location: "kat/stock-line/ZA-02-A04" },
-            { code: "1017", barcode: "6224001200256", name: "شاي الربيع أوراق بالنعناع - 300 جم", category: "شاي بالنعناع", sysStock: 70, actualStock: 69, location: "kat/stock-line/ZA-02-A05" },
-            { code: "1018", barcode: "6224001200287", name: "شاي الربيع أوراق الجوافة - 100 جم", category: "شاي ناعم", sysStock: 40, actualStock: 39, location: "kat/stock-line/ZA-02-A06" },
-            { code: "1019", barcode: "6221000001001", name: "شيبسي - طماطم", category: "عائلي", sysStock: 30, actualStock: 29, location: "kat/stock-line/ZA-02-B01" },
-            { code: "1020", barcode: "6221000001002", name: "شيبسي - جبنة متبلة", category: "عائلي", sysStock: 40, actualStock: 38, location: "kat/stock-line/ZA-02-B02" },
-            { code: "1021", barcode: "6221000001003", name: "شيبسي - شطة وليمون", category: "عائلي", sysStock: 8, actualStock: 6, location: "kat/stock-line/ZA-02-B03" },
-            { code: "1022", barcode: "6221000001004", name: "شيبسي - ملح", category: "وسط", sysStock: 84, actualStock: 80, location: "kat/stock-line/ZA-02-B04" },
-            { code: "1023", barcode: "6221000001005", name: "شيبسي - كباب", category: "وسط", sysStock: 250, actualStock: 248, location: "kat/stock-line/ZA-02-B05" },
-            { code: "1024", barcode: "6221000001006", name: "تايجر - جبنة", category: "كبير", sysStock: 221, actualStock: 220, location: "kat/stock-line/ZA-02-B06" },
-            { code: "1025", barcode: "6221000001007", name: "تايجر - شطة وليمون", category: "كبير", sysStock: 33, actualStock: 30, location: "kat/stock-line/ZA-03-A01" },
-            { code: "1026", barcode: "6221000001008", name: "تايجر - طماطم", category: "صغير", sysStock: 445, actualStock: 442, location: "kat/stock-line/ZA-03-A02" },
-            { code: "1027", barcode: "6221000001009", name: "لايز - ملح كلاسيك", category: "عائلي", sysStock: 14, actualStock: 12, location: "kat/stock-line/ZA-03-A03" },
-            { code: "1028", barcode: "6221000001010", name: "لايز - خل وملح", category: "عائلي", sysStock: 221, actualStock: 220, location: "kat/stock-line/ZA-03-A04" },
-            { code: "1029", barcode: "6221000001011", name: "دوريتوس - جبنة ناتشو", category: "كبير", sysStock: 99, actualStock: 95, location: "kat/stock-line/ZA-03-A05" },
-            { code: "1030", barcode: "6221000001012", name: "دوريتوس - فلفل حلو", category: "كبير", sysStock: 100, actualStock: 98, location: "kat/stock-line/ZA-03-A06" },
-            { code: "1031", barcode: "6221000001013", name: "دوريتوس - حار نار", category: "وسط", sysStock: 883, actualStock: 880, location: "kat/stock-line/ZA-03-B01" },
-            { code: "1032", barcode: "6221000001014", name: "شيتوس - كرنشي جبنة", category: "كبير", sysStock: 337, actualStock: 335, location: "kat/stock-line/ZA-03-B02" },
-            { code: "1033", barcode: "6221000001015", name: "شيتوس - حار نار", category: "كبير", sysStock: 60, actualStock: 58, location: "kat/stock-line/ZA-03-B03" },
-            { code: "1034", barcode: "6221000001016", name: "بيك رولز - بيتزا", category: "وسط", sysStock: 255, actualStock: 250, location: "kat/stock-line/ZA-03-B04" },
-            { code: "1035", barcode: "6221000001017", name: "بيك رولز - كاتشب", category: "وسط", sysStock: 554, actualStock: 550, location: "kat/stock-line/ZA-03-B05" },
-            { code: "1036", barcode: "6221000001018", name: "فوكس - جبنة فرنسية", category: "وسط", sysStock: 228, actualStock: 225, location: "kat/stock-line/ZA-03-B06" },
-            { code: "1037", barcode: "6221000001019", name: "فوكس - طماطم", category: "وسط", sysStock: 111, actualStock: 110, location: "kat/stock-line/ZA-04-A01" },
-            { code: "1038", barcode: "6221000001020", name: "ويندوز - جبنة", category: "صغير", sysStock: 333, actualStock: 330, location: "kat/stock-line/ZA-04-A02" },
-            { code: "1039", barcode: "6222001010013", name: "وفير سائل غسيل أطباق بالليمون - 1 لتر", category: "منظف أواني", sysStock: 889, actualStock: 885, location: "kat/stock-line/ZA-04-A03" },
-            { code: "1040", barcode: "6222001010030", name: "بريل سائل غسيل أواني مركز - 1 لتر", category: "منظف أواني", sysStock: 677, actualStock: 675, location: "kat/stock-line/ZA-04-A04" },
-            { code: "1041", barcode: "6222001010037", name: "بريل سائل غسيل أواني - 600 مل", category: "منظف أواني", sysStock: 223, actualStock: 220, location: "kat/stock-line/ZA-04-A05" },
-            { code: "1042", barcode: "6222001010044", name: "فيرا سائل غسيل أواني بالليمون - 2.5 لتر", category: "منظف أواني", sysStock: 558, actualStock: 555, location: "kat/stock-line/ZA-04-A06" },
-            { code: "1043", barcode: "6222001010051", name: "فيري سائل غسيل أطباق للأيد الحساسة - 650 مل", category: "منظف أواني", sysStock: 44, actualStock: 42, location: "kat/stock-line/ZA-04-B01" },
-            { code: "1044", barcode: "6222001010068", name: "أريال أوتوماتيك بودرة بالافندر - 4 كجم", category: "مسحوق غسيل", sysStock: 33, actualStock: 30, location: "kat/stock-line/ZA-04-B02" },
-            { code: "1045", barcode: "6222002020012", name: "أريال أوتوماتيك جيل للغسالات - 2.5 لتر", category: "مسحوق غسيل", sysStock: 99, actualStock: 98, location: "kat/stock-line/ZA-04-B03" },
-            { code: "1046", barcode: "6222002020029", name: "تايد أوتوماتيك بودرة للغسالات - 5 كجم", category: "مسحوق غسيل", sysStock: 200, actualStock: 198, location: "kat/stock-line/ZA-04-B04" },
-            { code: "1047", barcode: "6222002020036", name: "تايد أوتوماتيك جيل بالياسمين - 2.5 لتر", category: "مسحوق غسيل", sysStock: 70, actualStock: 70, location: "kat/stock-line/ZA-04-B05" },
-            { code: "1048", barcode: "6222002020043", name: "أوكسي أوتوماتيك بودرة بالافندر - 4.25 كجم", category: "مسحوق غسيل", sysStock: 116, actualStock: 115, location: "kat/stock-line/ZA-04-B06" },
-            { code: "1049", barcode: "6222002020060", name: "أوكسي يدوي/عادي بودرة - 1 كجم", category: "مسحوق غسيل", sysStock: 336, actualStock: 335, location: "kat/stock-line/ZA-05-A01" },
-            { code: "1050", barcode: "6222002020067", name: "برسيل أوتوماتيك بودرة - 5 كجم", category: "مسحوق غسيل", sysStock: 390, actualStock: 388, location: "kat/stock-line/ZA-05-A02" },
-            { code: "1051", barcode: "6222002020074", name: "برسيل جيل أوتوماتيك برائحة النظافة - 3.9 لتر", category: "مسحوق غسيل", sysStock: 229, actualStock: 299, location: "kat/stock-line/ZA-05-A03" },
-            { code: "1052", barcode: "6222002020081", name: "برسيل أسود (بلاك) للعبايات والملابس الداكنة - 2.5 لتر", category: "مسحوق غسيل", sysStock: 150, actualStock: 150, location: "kat/stock-line/ZA-05-A04" },
-            { code: "1053", barcode: "6222004040041", name: "كلوركس ألوان للملابس الملونة - 1 لتر", category: "مطهرات وبياض", sysStock: 100, actualStock: 100, location: "kat/stock-line/ZA-05-A05" },
-            { code: "1054", barcode: "6222004040058", name: "كلوركس 5 في 1 منظف أرضيات برائحة الصنوبر - 1.5 لتر", category: "العناية بالملابس", sysStock: 203, actualStock: 203, location: "kat/stock-line/ZA-05-A06" },
-            { code: "1055", barcode: "6222004040065", name: "جلانس منظف وملمع زجاج - 600 مل (بخاخ)", category: "منظف أرضيات", sysStock: 224, actualStock: 224, location: "kat/stock-line/ZA-05-B01" },
-            { code: "1056", barcode: "6222005050019", name: "سيـف (Cif) كريم منظف أسطح ودهون - 500 مل", category: "ملمع زجاج", sysStock: 299, actualStock: 299, location: "kat/stock-line/ZA-05-B02" },
-            { code: "1057", barcode: "6222005050026", name: "ستريس مزيل دهون المطبخ والبوتجاز - 700 مل", category: "مذيب دهون", sysStock: 500, actualStock: 500, location: "kat/stock-line/ZA-05-B03" },
-            { code: "1058", barcode: "6222005050033", name: "هاربيك منظف ومطهر التواليت - 700 مل", category: "مذيب دهون", sysStock: 699, actualStock: 699, location: "kat/stock-line/ZA-05-B04" },
-            { code: "1059", barcode: "2999019331", name: "بيج شيبسي ١٠٠جم", category: "شيبسي صغير", sysStock: 100, actualStock: 100, location: "kat/stock-line/ZA-05-B05" },
-            { code: "1060", barcode: "6222002300099", name: "كيس رز 1 كيلو", category: "رز الضحي", sysStock: 100, actualStock: 100, location: "kat/stock-line/ZA-05-B06" },
-        ];
-        
         let products = [];
         let inventorySheet = [];
         let cart = [];
         let invoices = [];
         let orders = []; 
-        let selectedProductToDelete = null;
-        let selectedInvoiceToDelete = null;
         let categoryChartInstance = null;
 
         function initTheme() {
@@ -837,7 +774,15 @@
             if (savedSheet) {
                 inventorySheet = JSON.parse(savedSheet);
             } else {
-                inventorySheet = JSON.parse(JSON.stringify(defaultInventorySheet));
+                // ربط تلقائي للأعداد الافتراضية مع مخزون الأصناف
+                inventorySheet = products.map(p => ({
+                    code: p.code,
+                    barcode: p.barcode,
+                    name: p.name,
+                    category: p.category,
+                    actualStock: p.stock,
+                    location: "kat/stock-line/ZA-01-A01"
+                }));
                 saveInventorySheetToStorage();
             }
 
@@ -853,22 +798,7 @@
             if (savedOrders) {
                 orders = JSON.parse(savedOrders);
             } else {
-                orders = [
-                    {
-                        id: "9001",
-                        date: new Date().toISOString(),
-                        buyerName: "محمد إبراهيم (موقع)",
-                        sellerName: "أونلاين",
-                        paymentMethod: "تحويل بنكي",
-                        items: [
-                            { id: 1002, name: "شاي العروسة ناعم - 100 جم", category: "شاي ناعم", price: 28, cost: 22.4, quantity: 2 }
-                        ],
-                        subtotal: 56,
-                        discount: 0,
-                        finalTotal: 56,
-                        profit: 11.2
-                    }
-                ];
+                orders = [];
                 saveOrdersToStorage();
             }
         }
@@ -1014,6 +944,26 @@
             }
         }
 
+        // دالة دمج وتحديث الأعداد بين خانة الأصناف وخانة الجرد تلقائياً
+        function syncSheetWithProducts() {
+            // تحديث أو دمج الأصناف بناءً على الكود لتتوافق تماماً مع قائمة الأصناف الحالية
+            const newSheet = products.map(prod => {
+                const existing = inventorySheet.find(i => i.code === prod.code);
+                return {
+                    code: prod.code,
+                    barcode: prod.barcode || "",
+                    name: prod.name,
+                    category: prod.category,
+                    actualStock: existing ? existing.actualStock : prod.stock,
+                    location: existing ? existing.location : "kat/stock-line/ZA-01-A01"
+                };
+            });
+            inventorySheet = newSheet;
+            saveInventorySheetToStorage();
+            renderInventorySheetTable();
+            showToast('تم دمج وتحديث أعداد وأصناف الجرد لتتطابق تماماً مع قسم الأصناف!', 'success');
+        }
+
         function renderInventorySheetTable() {
             const query = document.getElementById('sheet-search').value.trim().toLowerCase();
             const tbody = document.getElementById('inventory-sheet-tbody');
@@ -1031,7 +981,12 @@
 
             inventorySheet.forEach(item => {
                 totalActual += (parseInt(item.actualStock) || 0);
-                const diff = (parseInt(item.sysStock) || 0) - (parseInt(item.actualStock) || 0);
+                
+                // جلب مخزون السيستم المحدث من جدول الأصناف (Products) للربط التام
+                const matchedProd = products.find(p => p.code === item.code);
+                const sysStock = matchedProd ? matchedProd.stock : 0;
+
+                const diff = sysStock - (parseInt(item.actualStock) || 0);
                 if (diff > 0) totalDeficits += diff;
             });
 
@@ -1045,7 +1000,8 @@
             }
 
             tbody.innerHTML = filtered.map((item) => {
-                const sys = parseInt(item.sysStock) || 0;
+                const matchedProd = products.find(p => p.code === item.code);
+                const sys = matchedProd ? matchedProd.stock : 0;
                 const actual = parseInt(item.actualStock) || 0;
                 const deficit = sys - actual;
 
@@ -1092,202 +1048,17 @@
         }
 
         function resetInventorySheetData() {
-            inventorySheet = JSON.parse(JSON.stringify(defaultInventorySheet));
+            inventorySheet = products.map(p => ({
+                code: p.code,
+                barcode: p.barcode || "",
+                name: p.name,
+                category: p.category,
+                actualStock: p.stock,
+                location: "kat/stock-line/ZA-01-A01"
+            }));
             saveInventorySheetToStorage();
             renderInventorySheetTable();
-            showToast('تمت استعادة بيانات خانة الجرد الافتراضية بنجاح!', 'info');
-        }
-
-        function renderPosSearchResults() {
-            const query = document.getElementById('pos-search').value.trim().toLowerCase();
-            const container = document.getElementById('pos-search-results');
-
-            const filtered = products.filter(p => 
-                p.name.toLowerCase().includes(query) ||
-                p.code.toLowerCase().includes(query) ||
-                (p.barcode && p.barcode.toLowerCase().includes(query)) ||
-                p.category.toLowerCase().includes(query)
-            );
-
-            if (filtered.length === 0) {
-                container.innerHTML = '<div class="col-span-full text-center py-12 text-gray-400 text-sm">لم يتم العثور على أية أصناف مطابقة</div>';
-                return;
-            }
-
-            container.innerHTML = filtered.map(prod => `
-                <div class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between hover:border-blue-300 transition">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-xs bg-gray-100 dark:bg-gray-700 font-bold px-2 py-0.5 rounded text-gray-600 dark:text-gray-300">كود: ${prod.code}</span>
-                            <span class="text-xs ${prod.stock <= 10 ? 'bg-rose-100 text-rose-600' : 'bg-emerald-100 text-emerald-700'} font-bold px-2 py-0.5 rounded">مخزون: ${prod.stock}</span>
-                        </div>
-                        <h4 class="font-bold text-gray-800 dark:text-white text-sm mb-1">${prod.name}</h4>
-                        <p class="text-xs text-gray-400 mb-3">${prod.category}</p>
-                    </div>
-                    <div class="flex justify-between items-center pt-2 border-t dark:border-gray-700">
-                        <span class="text-base sm:text-lg font-black text-blue-600 dark:text-blue-400">${prod.price.toFixed(2)} ج.م</span>
-                        <button onclick="addToCart(${prod.id})" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1">
-                            <i class="fa-solid fa-plus"></i> إضافة
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function addToCart(prodId) {
-            const prod = products.find(p => p.id === prodId);
-            if (!prod) return;
-
-            if (prod.stock <= 0) {
-                showToast(`الصنف (${prod.name}) غير متوفر بالمخزن!`, 'error');
-                return;
-            }
-
-            const cartItem = cart.find(c => c.id === prodId);
-            if (cartItem) {
-                if (cartItem.quantity + 1 > prod.stock) {
-                    showToast(`الكمية المطلوبة تتجاوز المتاح بمخزن (${prod.name})`, 'error');
-                    return;
-                }
-                cartItem.quantity++;
-            } else {
-                cart.push({ ...prod, quantity: 1 });
-            }
-
-            renderCart();
-            showToast(`تمت إضافة ${prod.name} إلى الفاتورة`, 'success');
-        }
-
-        function updateCartQty(prodId, newQty) {
-            const prod = products.find(p => p.id === prodId);
-            const cartItem = cart.find(c => c.id === prodId);
-            
-            if (!cartItem) return;
-
-            if (newQty <= 0) {
-                cart = cart.filter(c => c.id !== prodId);
-            } else {
-                if (prod && newQty > prod.stock) {
-                    showToast(`المخزون المتاح فقط هو ${prod.stock} قطعة`, 'error');
-                    cartItem.quantity = prod.stock;
-                } else {
-                    cartItem.quantity = newQty;
-                }
-            }
-            renderCart();
-        }
-
-        function clearCart() {
-            cart = [];
-            renderCart();
-        }
-
-        function renderCart() {
-            const container = document.getElementById('cart-items-container');
-
-            if (cart.length === 0) {
-                container.innerHTML = '<p class="text-gray-400 text-sm text-center py-10">الفاتورة فارغة — ابحث عن صنف أو انقر للإضافة</p>';
-                calculateCartTotals();
-                return;
-            }
-
-            container.innerHTML = cart.map(item => `
-                <div class="py-2.5 flex justify-between items-center text-xs">
-                    <div class="flex-1 pr-1">
-                        <p class="font-bold text-gray-800 dark:text-white line-clamp-1">${item.name}</p>
-                        <p class="text-gray-400">${item.price.toFixed(2)} ج.م / قطعة</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <div class="flex items-center border dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800 overflow-hidden">
-                            <button onclick="updateCartQty(${item.id}, ${item.quantity - 1})" class="px-2 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">-</button>
-                            <span class="px-2 font-bold dark:text-white">${item.quantity}</span>
-                            <button onclick="updateCartQty(${item.id}, ${item.quantity + 1})" class="px-2 py-1 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700">+</button>
-                        </div>
-                        <span class="font-bold text-blue-600 dark:text-blue-400 w-14 text-left">${(item.price * item.quantity).toFixed(2)}</span>
-                    </div>
-                </div>
-            `).join('');
-
-            calculateCartTotals();
-        }
-
-        function calculateCartTotals() {
-            const totalItemsCount = cart.reduce((sum, i) => sum + i.quantity, 0);
-            const subtotal = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
-            const totalCost = cart.reduce((sum, i) => sum + (i.cost * i.quantity), 0);
-
-            const discountInput = parseFloat(document.getElementById('cart-discount-input').value) || 0;
-            const discountType = document.getElementById('cart-discount-type').value;
-
-            let discountVal = 0;
-            if (discountType === 'percent') {
-                discountVal = (subtotal * discountInput) / 100;
-            } else {
-                discountVal = discountInput;
-            }
-
-            const finalTotal = Math.max(0, subtotal - discountVal);
-            const expectedProfit = Math.max(0, (subtotal - totalCost) - discountVal);
-
-            document.getElementById('cart-items-count').innerText = `${cart.length} صنف (${totalItemsCount} قطعة)`;
-            document.getElementById('cart-subtotal').innerText = subtotal.toFixed(2) + ' ج.م';
-            document.getElementById('cart-final-total').innerText = finalTotal.toFixed(2) + ' ج.م';
-            document.getElementById('cart-expected-profit').innerText = expectedProfit.toFixed(2) + ' ج.م';
-        }
-
-        function checkout() {
-            if (cart.length === 0) {
-                showToast('السلة فارغة!', 'error');
-                return;
-            }
-
-            const buyerName = document.getElementById('pos-buyer-name').value.trim() || 'نقدي';
-            const sellerName = document.getElementById('pos-seller-name').value.trim() || 'أحمد نور';
-            const paymentMethod = document.getElementById('pos-payment-method').value;
-
-            const subtotal = cart.reduce((sum, i) => sum + (i.price * i.quantity), 0);
-            const totalCost = cart.reduce((sum, i) => sum + (i.cost * i.quantity), 0);
-            const discountInput = parseFloat(document.getElementById('cart-discount-input').value) || 0;
-            const discountType = document.getElementById('cart-discount-type').value;
-
-            let discountVal = discountType === 'percent' ? (subtotal * discountInput) / 100 : discountInput;
-            const finalTotal = Math.max(0, subtotal - discountVal);
-            const profit = Math.max(0, (subtotal - totalCost) - discountVal);
-
-            for (const item of cart) {
-                const prod = products.find(p => p.id === item.id);
-                if (prod) {
-                    prod.stock -= item.quantity;
-                }
-            }
-
-            const invoiceId = Math.floor(100000 + Math.random() * 900000).toString();
-            const newInvoice = {
-                id: invoiceId,
-                date: new Date().toISOString(),
-                buyerName,
-                sellerName,
-                paymentMethod,
-                items: [...cart],
-                subtotal,
-                discount: discountVal,
-                finalTotal,
-                profit
-            };
-
-            invoices.push(newInvoice);
-            saveProductsToStorage();
-            saveInvoicesToStorage();
-
-            cart = [];
-            document.getElementById('pos-buyer-name').value = '';
-            document.getElementById('cart-discount-input').value = '0';
-            renderCart();
-            renderPosSearchResults();
-            renderDashboard();
-
-            showToast('تم إتمام الدفع وإنشاء الفاتورة بنجاح!', 'success');
-            openPrintModal(newInvoice);
+            showToast('تمت مطابقة واستعادة بيانات خانة الجرد مع الأصناف بنجاح!', 'info');
         }
 
         function renderInventoryTable() {
@@ -1298,8 +1069,7 @@
             let filtered = products.filter(p => 
                 p.name.toLowerCase().includes(query) ||
                 p.code.toLowerCase().includes(query) ||
-                (p.barcode && p.barcode.toLowerCase().includes(query)) ||
-                p.category.toLowerCase().includes(query)
+                (p.barcode && p.barcode.toLowerCase().includes(query))
             );
 
             if (filter === 'low') {
@@ -1318,15 +1088,15 @@
                 return;
             }
 
-            tbody.innerHTML = filtered.map(p => `
+            tbody.innerHTML = filtered.map(prod => `
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b dark:border-gray-700">
-                    <td class="p-3.5 font-bold text-gray-700 dark:text-gray-300">${p.code}</td>
-                    <td class="p-3.5 font-bold text-gray-800 dark:text-white">${p.name}</td>
-                    <td class="p-3.5 text-gray-500">${p.category}</td>
-                    <td class="p-3.5 font-bold ${p.stock <= 10 ? 'text-rose-600' : 'text-blue-600'}">${p.stock}</td>
-                    <td class="p-3.5 font-bold text-gray-800 dark:text-white">${p.price.toFixed(2)} ج.م</td>
+                    <td class="p-3.5 font-bold text-gray-700 dark:text-gray-300">${prod.code}</td>
+                    <td class="p-3.5 font-bold text-gray-800 dark:text-white">${prod.name}</td>
+                    <td class="p-3.5 text-gray-500">${prod.category}</td>
+                    <td class="p-3.5 font-black text-blue-600 dark:text-blue-400">${prod.stock}</td>
+                    <td class="p-3.5 font-bold text-gray-800 dark:text-white">${prod.price.toFixed(2)} ج.م</td>
                     <td class="p-3.5">
-                        ${p.stock <= 10 ? '<span class="px-2 py-1 bg-rose-100 text-rose-600 rounded text-xs font-bold">منخفض</span>' : '<span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded text-xs font-bold">متوفر</span>'}
+                        ${prod.stock <= 10 ? '<span class="px-2.5 py-1 bg-rose-100 text-rose-700 font-bold rounded-full text-xs">منخفض</span>' : '<span class="px-2.5 py-1 bg-emerald-100 text-emerald-700 font-bold rounded-full text-xs">متوفر</span>'}
                     </td>
                 </tr>
             `).join('');
@@ -1348,18 +1118,18 @@
                 return;
             }
 
-            tbody.innerHTML = filtered.map(p => `
+            tbody.innerHTML = filtered.map(prod => `
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-900 border-b dark:border-gray-700">
-                    <td class="p-3.5 font-bold text-gray-700 dark:text-gray-300">${p.code}</td>
-                    <td class="p-3.5 font-mono text-xs text-gray-500">${p.barcode || '-'}</td>
-                    <td class="p-3.5 font-bold text-gray-800 dark:text-white">${p.name}</td>
-                    <td class="p-3.5 text-gray-500">${p.category}</td>
-                    <td class="p-3.5 font-bold text-blue-600">${p.price.toFixed(2)} ج.م</td>
-                    <td class="p-3.5 text-gray-500">${p.cost.toFixed(2)} ج.م</td>
-                    <td class="p-3.5 font-bold ${p.stock <= 10 ? 'text-rose-600' : 'text-gray-800 dark:text-white'}">${p.stock}</td>
+                    <td class="p-3.5 font-bold text-gray-700 dark:text-gray-300">${prod.code}</td>
+                    <td class="p-3.5 font-mono text-xs text-gray-500">${prod.barcode || '-'}</td>
+                    <td class="p-3.5 font-bold text-gray-800 dark:text-white">${prod.name}</td>
+                    <td class="p-3.5 text-gray-500">${prod.category}</td>
+                    <td class="p-3.5 font-bold text-blue-600 dark:text-blue-400">${prod.price.toFixed(2)} ج.م</td>
+                    <td class="p-3.5 text-gray-500">${prod.cost.toFixed(2)} ج.م</td>
+                    <td class="p-3.5 font-bold text-gray-800 dark:text-white">${prod.stock}</td>
                     <td class="p-3.5 text-center flex justify-center gap-2">
-                        <button onclick="openProductModal(${p.id})" class="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-bold"><i class="fa-solid fa-pen"></i></button>
-                        <button onclick="openDeleteProductModal(${p.id})" class="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-xs font-bold"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="openProductModal(${prod.id})" class="p-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-bold"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="openDeleteProductModal(${prod.id})" class="p-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-xs font-bold"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>
             `).join('');
@@ -1369,25 +1139,23 @@
             const modal = document.getElementById('product-modal');
             const title = document.getElementById('modal-title');
             
-            document.getElementById('product-form').reset();
-            document.getElementById('prod-id').value = '';
-
             if (prodId) {
-                title.innerText = 'تعديل الصنف';
-                const p = products.find(item => item.id === prodId);
-                if (p) {
-                    document.getElementById('prod-id').value = p.id;
-                    document.getElementById('modal-code').value = p.code;
-                    document.getElementById('modal-barcode').value = p.barcode || '';
-                    document.getElementById('modal-name').value = p.name;
-                    document.getElementById('modal-category').value = p.category;
-                    document.getElementById('modal-price').value = p.price;
-                    document.getElementById('modal-cost').value = p.cost;
-                    document.getElementById('modal-stock').value = p.stock;
+                title.innerText = 'تعديل صنف';
+                const prod = products.find(p => p.id === prodId);
+                if (prod) {
+                    document.getElementById('prod-id').value = prod.id;
+                    document.getElementById('modal-code').value = prod.code;
+                    document.getElementById('modal-barcode').value = prod.barcode || '';
+                    document.getElementById('modal-name').value = prod.name;
+                    document.getElementById('modal-category').value = prod.category;
+                    document.getElementById('modal-price').value = prod.price;
+                    document.getElementById('modal-cost').value = prod.cost;
+                    document.getElementById('modal-stock').value = prod.stock;
                 }
             } else {
                 title.innerText = 'إضافة صنف جديد';
-                document.getElementById('modal-code').value = '10' + (products.length + 1);
+                document.getElementById('prod-id').value = '';
+                document.getElementById('product-form').reset();
             }
             modal.classList.remove('hidden');
         }
@@ -1408,17 +1176,17 @@
             const stock = parseInt(document.getElementById('modal-stock').value) || 0;
 
             if (id) {
-                const p = products.find(item => item.id == id);
-                if (p) {
-                    p.code = code;
-                    p.barcode = barcode;
-                    p.name = name;
-                    p.category = category;
-                    p.price = price;
-                    p.cost = cost;
-                    p.stock = stock;
+                const prod = products.find(p => p.id == id);
+                if (prod) {
+                    prod.code = code;
+                    prod.barcode = barcode;
+                    prod.name = name;
+                    prod.category = category;
+                    prod.price = price;
+                    prod.cost = cost;
+                    prod.stock = stock;
                 }
-                showToast('تم تعديل الصنف بنجاح!', 'success');
+                showToast('تم تحديث الصنف بنجاح!', 'success');
             } else {
                 const newProd = {
                     id: Date.now(),
@@ -1431,7 +1199,7 @@
                     stock
                 };
                 products.push(newProd);
-                showToast('تم إضافة الصنف الجديد بنجاح!', 'success');
+                showToast('تمت إضافة الصنف الجديد بنجاح!', 'success');
             }
 
             saveProductsToStorage();
@@ -1441,27 +1209,32 @@
             renderPosSearchResults();
         }
 
+        let selectedProdIdToDelete = null;
         function openDeleteProductModal(prodId) {
-            selectedProductToDelete = products.find(p => p.id === prodId);
-            if (!selectedProductToDelete) return;
+            selectedProdIdToDelete = prodId;
+            const prod = products.find(p => p.id === prodId);
+            if (prod) {
+                document.getElementById('delete-prod-name').innerText = prod.name;
+                document.getElementById('delete-product-modal').classList.remove('hidden');
+            }
+        }
 
-            document.getElementById('delete-prod-name').innerText = selectedProductToDelete.name;
-            document.getElementById('delete-product-modal').classList.remove('hidden');
-            document.getElementById('confirm-delete-prod-btn').onclick = function() {
-                products = products.filter(p => p.id !== prodId);
+        function closeDeleteProductModal() {
+            document.getElementById('delete-product-modal').classList.add('hidden');
+            selectedProdIdToDelete = null;
+        }
+
+        document.getElementById('confirm-delete-prod-btn').addEventListener('click', () => {
+            if (selectedProdIdToDelete) {
+                products = products.filter(p => p.id !== selectedProdIdToDelete);
                 saveProductsToStorage();
                 closeDeleteProductModal();
                 renderProductsTable();
                 renderInventoryTable();
                 renderPosSearchResults();
-                showToast('تم حذف الصنف بنجاح!', 'success');
-            };
-        }
-
-        function closeDeleteProductModal() {
-            document.getElementById('delete-product-modal').classList.add('hidden');
-            selectedProductToDelete = null;
-        }
+                showToast('تم حذف الصنف بنجاح', 'success');
+            }
+        });
 
         function renderInvoicesList() {
             const query = document.getElementById('invoices-search').value.trim().toLowerCase();
@@ -1469,12 +1242,12 @@
 
             const filtered = invoices.filter(i => 
                 i.id.toLowerCase().includes(query) ||
-                i.buyerName.toLowerCase().includes(query) ||
-                i.sellerName.toLowerCase().includes(query)
-            ).reverse();
+                (i.buyerName && i.buyerName.toLowerCase().includes(query)) ||
+                (i.sellerName && i.sellerName.toLowerCase().includes(query))
+            );
 
-            const totalSales = invoices.reduce((sum, i) => sum + i.finalTotal, 0);
-            const totalProfit = invoices.reduce((sum, i) => sum + i.profit, 0);
+            const totalSales = invoices.reduce((sum, i) => sum + (i.finalTotal || 0), 0);
+            const totalProfit = invoices.reduce((sum, i) => sum + (i.profit || 0), 0);
             const totalDiscount = invoices.reduce((sum, i) => sum + (i.discount || 0), 0);
 
             document.getElementById('inv-sum-count').innerText = invoices.length;
@@ -1483,65 +1256,76 @@
             document.getElementById('inv-sum-discount').innerText = totalDiscount.toFixed(2) + ' ج.م';
 
             if (filtered.length === 0) {
-                container.innerHTML = '<p class="text-gray-400 text-sm text-center py-12">لا توجد فواتير مطابقة للبحث</p>';
+                container.innerHTML = '<p class="text-gray-400 text-sm text-center py-12">لا توجد فواتير مسجلة حالياً</p>';
                 return;
             }
 
-            container.innerHTML = filtered.map(inv => `
-                <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-900 transition">
+            container.innerHTML = filtered.slice().reverse().map(inv => `
+                <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:bg-gray-50 dark:hover:bg-gray-900 transition">
                     <div>
                         <div class="flex items-center gap-2 mb-1">
-                            <span class="font-bold text-blue-600 text-sm">#${inv.id}</span>
-                            <span class="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded text-gray-600 dark:text-gray-300 font-semibold">${inv.paymentMethod}</span>
-                            <span class="text-xs text-gray-400">${new Date(inv.date).toLocaleString('ar-EG')}</span>
+                            <span class="font-bold text-gray-800 dark:text-white text-base">فاتورة #${inv.id}</span>
+                            <span class="text-xs bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded">${inv.paymentMethod}</span>
                         </div>
-                        <p class="text-xs text-gray-600 dark:text-gray-300">المشتري: <span class="font-bold text-gray-800 dark:text-white">${inv.buyerName}</span> | البائع: <span class="font-bold text-gray-800 dark:text-white">${inv.sellerName}</span></p>
-                        <p class="text-xs text-emerald-600 font-semibold mt-1">الربح المتوقع: ${inv.profit.toFixed(2)} ج.م</p>
+                        <p class="text-xs text-gray-500">العميل: <span class="font-semibold text-gray-700 dark:text-gray-300">${inv.buyerName || 'نقدي'}</span> | الكاشير: ${inv.sellerName} | التاريخ: ${new Date(inv.date).toLocaleString('ar-EG')}</p>
+                        <p class="text-xs text-emerald-600 font-bold mt-1">الربح: ${inv.profit.toFixed(2)} ج.م</p>
                     </div>
-                    <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
                         <div class="text-left">
-                            <p class="text-base sm:text-lg font-black text-blue-600 dark:text-blue-400">${inv.finalTotal.toFixed(2)} ج.م</p>
+                            <p class="text-lg font-black text-blue-600 dark:text-blue-400">${inv.finalTotal.toFixed(2)} ج.م</p>
                             <p class="text-xs text-gray-400">${inv.items.length} أصناف</p>
                         </div>
                         <div class="flex gap-1">
-                            <button onclick='openPrintModal(${JSON.stringify(inv)})' class="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-bold" title="عرض وطباعة"><i class="fa-solid fa-print"></i></button>
+                            <button onclick="printSavedInvoice('${inv.id}')" class="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-bold" title="طباعة الفاتورة"><i class="fa-solid fa-print"></i></button>
                             <button onclick="openEditInvoiceModal('${inv.id}')" class="p-2 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-lg text-xs font-bold" title="تعديل"><i class="fa-solid fa-pen"></i></button>
-                            <button onclick="openDeleteModal('${inv.id}')" class="p-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-xs font-bold" title="حذف وإرجاع المخزون"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="openDeleteModal('${inv.id}')" class="p-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-xs font-bold" title="حذف واسترجاع المخزون"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        function openPrintModal(inv) {
-            const container = document.getElementById('printable-invoice');
-            container.innerHTML = `
-                <div class="text-center pb-3 border-b dark:border-gray-700">
-                    <h2 class="font-black text-sm sm:text-base">Nour Group ERP</h2>
-                    <p class="text-[10px] text-gray-500">نظام المبيعات والمخزون</p>
-                    <p class="text-[10px] text-gray-400 mt-1">فاتورة مبيعات رقم: #${inv.id}</p>
+        function printSavedInvoice(id) {
+            const inv = invoices.find(i => i.id === id);
+            if (!inv) return;
+
+            const printable = document.getElementById('printable-invoice');
+            printable.innerHTML = `
+                <div class="text-center border-b pb-3 mb-3">
+                    <h2 class="font-bold text-base">نور جروب للمبيعات والمخزون</h2>
+                    <p class="text-[10px] text-gray-500">فاتورة مبيعات رقم #${inv.id}</p>
+                    <p class="text-[10px] text-gray-400">${new Date(inv.date).toLocaleString('ar-EG')}</p>
                 </div>
-                <div class="py-2 space-y-1 text-xs">
-                    <div class="flex justify-between"><span>التاريخ:</span><span class="font-semibold">${new Date(inv.date).toLocaleString('ar-EG')}</span></div>
-                    <div class="flex justify-between"><span>المشتري:</span><span class="font-semibold">${inv.buyerName}</span></div>
-                    <div class="flex justify-between"><span>الكاشير:</span><span class="font-semibold">${inv.sellerName}</span></div>
-                    <div class="flex justify-between"><span>طريقة الدفع:</span><span class="font-semibold">${inv.paymentMethod}</span></div>
+                <div class="space-y-1 mb-3 text-[11px]">
+                    <p><b>العميل:</b> ${inv.buyerName}</p>
+                    <p><b>الكاشير:</b> ${inv.sellerName}</p>
+                    <p><b>طريقة الدفع:</b> ${inv.paymentMethod}</p>
                 </div>
-                <div class="border-t border-b dark:border-gray-700 py-2 my-2 space-y-2">
-                    ${inv.items.map(item => `
-                        <div class="flex justify-between text-xs">
-                            <span class="line-clamp-1">${item.name} (${item.quantity}x)</span>
-                            <span class="font-bold">${(item.price * item.quantity).toFixed(2)}</span>
-                        </div>
-                    `).join('')}
-                </div>
-                <div class="space-y-1 text-xs pt-1">
+                <table class="w-full text-right text-[11px] mb-3 border-collapse">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="py-1">الصنف</th>
+                            <th class="py-1 text-center">الكمية</th>
+                            <th class="py-1 text-left">السعر</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y">
+                        ${inv.items.map(item => `
+                            <tr>
+                                <td class="py-1">${item.name}</td>
+                                <td class="py-1 text-center">${item.quantity}</td>
+                                <td class="py-1 text-left">${(item.price * item.quantity).toFixed(2)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                <div class="border-t pt-2 space-y-1 text-[11px]">
                     <div class="flex justify-between"><span>الإجمالي:</span><span>${inv.subtotal.toFixed(2)} ج.م</span></div>
-                    ${inv.discount > 0 ? `<div class="flex justify-between text-rose-500"><span>الخصم:</span><span>-${inv.discount.toFixed(2)} ج.م</span></div>` : ''}
-                    <div class="flex justify-between font-black text-sm sm:text-base pt-1 border-t dark:border-gray-700 text-blue-600"><span>النهائي:</span><span>${inv.finalTotal.toFixed(2)} ج.م</span></div>
+                    ${inv.discount > 0 ? `<div class="flex justify-between text-amber-600"><span>الخصم:</span><span>-${inv.discount.toFixed(2)} ج.م</span></div>` : ''}
+                    <div class="flex justify-between font-bold text-sm text-blue-600 pt-1 border-t"><span>الإجمالي النهائي:</span><span>${inv.finalTotal.toFixed(2)} ج.م</span></div>
                 </div>
-                <div class="text-center pt-4 text-[10px] text-gray-400 border-t dark:border-gray-700 mt-4">
-                    شكراً لتعاملكم معنا — نور جروب للمبيعات
+                <div class="text-center pt-4 text-[10px] text-gray-400 border-t mt-4">
+                    شكراً لتعاملكم مع نور جروب — مصر
                 </div>
             `;
             document.getElementById('print-modal').classList.remove('hidden');
@@ -1551,16 +1335,15 @@
             document.getElementById('print-modal').classList.add('hidden');
         }
 
-        function openEditInvoiceModal(invId) {
-            const inv = invoices.find(i => i.id === invId);
+        function openEditInvoiceModal(id) {
+            const inv = invoices.find(i => i.id === id);
             if (!inv) return;
 
             document.getElementById('edit-inv-id').value = inv.id;
-            document.getElementById('edit-inv-id-display').innerText = '#' + inv.id;
-            document.getElementById('edit-inv-buyer').value = inv.buyerName;
-            document.getElementById('edit-inv-seller').value = inv.sellerName;
-            document.getElementById('edit-inv-payment').value = inv.paymentMethod;
-
+            document.getElementById('edit-inv-id-display.innerText = '#' + inv.id;
+            document.getElementById('edit-inv-buyer').value = inv.buyerName || '';
+            document.getElementById('edit-inv-seller').value = inv.sellerName || '';
+            document.getElementById('edit-inv-payment').value = inv.paymentMethod || 'نقداً (كاش)';
             document.getElementById('edit-invoice-modal').classList.remove('hidden');
         }
 
@@ -1582,44 +1365,47 @@
                 inv.paymentMethod = payment;
                 saveInvoicesToStorage();
                 renderInvoicesList();
-                renderDashboard();
                 closeEditInvoiceModal();
-                showToast('تم تعديل بيانات الفاتورة بنجاح!', 'success');
+                showToast('تم تحديث بيانات الفاتورة بنجاح!', 'success');
             }
         }
 
-        function openDeleteModal(invId) {
-            selectedInvoiceToDelete = invoices.find(i => i.id === invId);
-            if (!selectedInvoiceToDelete) return;
-
-            document.getElementById('delete-inv-id').innerText = '#' + invId;
+        function openDeleteModal(id) {
+            selectedInvoiceToDelete = id;
+            document.getElementById('delete-inv-id').innerText = '#' + id;
             document.getElementById('delete-modal').classList.remove('hidden');
-
-            document.getElementById('confirm-delete-btn').onclick = function() {
-                for (const item of selectedInvoiceToDelete.items) {
-                    const prod = products.find(p => p.id === item.id);
-                    if (prod) {
-                        prod.stock += item.quantity;
-                    }
-                }
-
-                invoices = invoices.filter(i => i.id !== invId);
-                saveProductsToStorage();
-                saveInvoicesToStorage();
-
-                closeDeleteModal();
-                renderInvoicesList();
-                renderDashboard();
-                renderInventoryTable();
-                renderPosSearchResults();
-                showToast('تم حذف الفاتورة وإعادة المخزون بنجاح!', 'success');
-            };
         }
 
         function closeDeleteModal() {
             document.getElementById('delete-modal').classList.add('hidden');
             selectedInvoiceToDelete = null;
         }
+
+        document.getElementById('confirm-delete-btn').addEventListener('click', () => {
+            if (selectedInvoiceToDelete) {
+                const invIndex = invoices.findIndex(i => i.id === selectedInvoiceToDelete);
+                if (invIndex !== -1) {
+                    const inv = invoices[invIndex];
+                    // استرداد المخزون تلقائياً
+                    if (inv.items) {
+                        inv.items.forEach(item => {
+                            const prod = products.find(p => p.id === item.id);
+                            if (prod) {
+                                prod.stock += item.quantity;
+                            }
+                        });
+                        saveProductsToStorage();
+                    }
+                    invoices.splice(invIndex, 1);
+                    saveInvoicesToStorage();
+                    renderInvoicesList();
+                    renderInventoryTable();
+                    renderProductsTable();
+                    showToast('تم حذف الفاتورة واسترداد المخزون بنجاح!', 'success');
+                }
+                closeDeleteModal();
+            }
+        });
 
         function renderOrdersList() {
             const container = document.getElementById('orders-list-container');
@@ -1631,61 +1417,87 @@
             }
 
             container.innerHTML = orders.map(ord => `
-                <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div class="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div>
                         <div class="flex items-center gap-2 mb-1">
-                            <span class="font-bold text-blue-600 text-sm">طلب #${ord.id}</span>
-                            <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded font-semibold">${ord.paymentMethod}</span>
-                            <span class="text-xs text-gray-400">${new Date(ord.date).toLocaleString('ar-EG')}</span>
+                            <span class="font-bold text-gray-800 dark:text-white text-base">طلب موقع #${ord.id}</span>
+                            <span class="text-xs bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded">معلق</span>
                         </div>
-                        <p class="text-xs text-gray-600 dark:text-gray-300">العميل: <span class="font-bold text-gray-800 dark:text-white">${ord.buyerName}</span></p>
-                        <p class="text-xs text-gray-400 mt-1">${ord.items.map(i => `${i.name} (${i.quantity}x)`).join(', ')}</p>
+                        <p class="text-xs text-gray-500">العميل: <span class="font-semibold text-gray-700 dark:text-gray-300">${ord.buyerName}</span> | الدفع: ${ord.paymentMethod} | التاريخ: ${new Date(ord.date).toLocaleString('ar-EG')}</p>
+                        <p class="text-xs text-gray-400 mt-1">الأصناف: ${ord.items.map(i => `${i.name} (${i.quantity})`).join(', ')}</p>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <span class="font-black text-blue-600 dark:text-blue-400 text-base">${ord.finalTotal.toFixed(2)} ج.م</span>
-                        <button onclick="approveOrder('${ord.id}')" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow flex items-center gap-1">
-                            <i class="fa-solid fa-check"></i> موافقة وإضافة للفواتير
-                        </button>
+                    <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                        <span class="text-lg font-black text-blue-600 dark:text-blue-400">${ord.finalTotal.toFixed(2)} ج.م</span>
+                        <div class="flex gap-2">
+                            <button onclick="approveOrder('${ord.id}')" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1">
+                                <i class="fa-solid fa-check"></i> قبول وضم للفواتير
+                            </button>
+                            <button onclick="rejectOrder('${ord.id}')" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1">
+                                <i class="fa-solid fa-xmark"></i> رفض
+                            </button>
+                        </div>
                     </div>
                 </div>
             `).join('');
         }
 
         function simulateIncomingOrder() {
+            const sampleProd = products[Math.floor(Math.random() * products.length)];
+            const orderId = Math.floor(9000 + Math.random() * 1000).toString();
             const newOrd = {
-                id: Math.floor(9000 + Math.random() * 1000).toString(),
+                id: orderId,
                 date: new Date().toISOString(),
-                buyerName: "عميل إلكتروني #" + Math.floor(10 + Math.random() * 90),
+                buyerName: "عميل إلكتروني جديد",
                 sellerName: "الموقع الإلكتروني",
-                paymentMethod: "دفع إلكتروني",
+                paymentMethod: "بطاقة (فيزا)",
                 items: [
-                    { id: 1001, name: "شاي العروسة ناعم - 40 جم", category: "شاي ناعم", price: 12, cost: 9.6, quantity: 1 }
+                    { id: sampleProd.id, name: sampleProd.name, category: sampleProd.category, price: sampleProd.price, cost: sampleProd.cost, quantity: 1 }
                 ],
-                subtotal: 12,
+                subtotal: sampleProd.price,
                 discount: 0,
-                finalTotal: 12,
-                profit: 2.4
+                finalTotal: sampleProd.price,
+                profit: sampleProd.price - sampleProd.cost
             };
             orders.push(newOrd);
             saveOrdersToStorage();
             renderOrdersList();
-            showToast('تم استقبال طلب جديد من الموقع بنجاح!', 'success');
+            showToast('تم استلام طلب جديد من الموقع بنجاح!', 'info');
         }
 
-        function approveOrder(ordId) {
-            const ord = orders.find(o => o.id === ordId);
-            if (!ord) return;
+        function approveOrder(id) {
+            const ordIndex = orders.findIndex(o => o.id === id);
+            if (ordIndex !== -1) {
+                const ord = orders[ordIndex];
+                
+                // التأكد من توفر المخزون وخصمه
+                for (const item of ord.items) {
+                    const prod = products.find(p => p.id === item.id);
+                    if (prod) {
+                        prod.stock -= item.quantity;
+                    }
+                }
+                saveProductsToStorage();
 
-            invoices.push(ord);
-            orders = orders.filter(o => o.id !== ordId);
+                // نقله لسجل الفواتير الرسمية
+                invoices.push(ord);
+                saveInvoicesToStorage();
 
-            saveInvoicesToStorage();
+                orders.splice(ordIndex, 1);
+                saveOrdersToStorage();
+
+                renderOrdersList();
+                renderInvoicesList();
+                renderInventoryTable();
+                renderProductsTable();
+                showToast('تم قبول الطلب وخصم المخزون وإضافته للفواتير بنجاح!', 'success');
+            }
+        }
+
+        function rejectOrder(id) {
+            orders = orders.filter(o => o.id !== id);
             saveOrdersToStorage();
-
             renderOrdersList();
-            renderInvoicesList();
-            renderDashboard();
-            showToast('تمت الموافقة على الطلب ونقله إلى سجل الفواتير بنجاح!', 'success');
+            showToast('تم رفض وحذف الطلب', 'info');
         }
     </script>
 </body>
